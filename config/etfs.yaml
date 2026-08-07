@@ -1,0 +1,43 @@
+# India sector ETFs to track.
+# ticker must match the yfinance symbol (NSE tickers use the ".NS" suffix).
+# Add/remove rows to change what fetch.py pulls and what the dashboard shows.
+
+- ticker: NIFTYBEES.NS
+  name: Nippon India ETF Nifty BeES
+  sector: Broad Market
+
+- ticker: BANKBEES.NS
+  name: Nippon India ETF Bank BeES
+  sector: Banking
+
+- ticker: PSUBNKBEES.NS
+  name: Nippon India ETF PSU Bank BeES
+  sector: PSU Banking
+
+- ticker: ITBEES.NS
+  name: Nippon India ETF Nifty IT
+  sector: IT
+
+- ticker: PHARMABEES.NS
+  name: Nippon India ETF Nifty Pharma
+  sector: Pharma
+
+- ticker: CONSUMBEES.NS
+  name: Nippon India ETF Nifty India Consumption
+  sector: Consumption
+
+- ticker: INFRABEES.NS
+  name: Nippon India ETF Nifty Infra BeES
+  sector: Infrastructure
+
+- ticker: CPSEETF.NS
+  name: CPSE ETF
+  sector: PSU / Energy
+
+- ticker: JUNIORBEES.NS
+  name: Nippon India ETF Nifty Next 50
+  sector: Broad Market (Next 50)
+
+- ticker: MID150BEES.NS
+  name: Nippon India ETF Nifty Midcap 150
+  sector: Midcap
