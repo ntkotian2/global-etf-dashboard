@@ -5,13 +5,19 @@ Usage:
 """
 
 from datetime import date, timedelta
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import yaml
 
 from db import get_connection
 
 st.set_page_config(page_title="India Sector ETF Tracker", layout="wide")
+
+SOCIAL_TRENDING_CONFIG = (
+    Path(__file__).resolve().parent.parent / "config" / "social_trending_etfs.yaml"
+)
 
 PERIODS = {
     "1W": 7,
@@ -93,5 +99,33 @@ for name, series in full_pivot.items():
 
 comparison_df = pd.DataFrame(comparison).sort_values("1Y Return %", ascending=False)
 st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+
+st.subheader("Top 10 trending on social media")
+st.caption(
+    "Curated snapshot of ETFs frequently discussed on YouTube/X/Facebook finance "
+    "content, manually refreshed (see config/social_trending_etfs.yaml) — not a "
+    "live social-media feed."
+)
+
+with open(SOCIAL_TRENDING_CONFIG, "r", encoding="utf-8") as f:
+    trending_etfs = yaml.safe_load(f)
+
+trending_names = [e["name"] for e in trending_etfs]
+trending_pivot = df[df["name"].isin(trending_names)].pivot_table(
+    index="date", columns="name", values="close"
+)
+
+trending_rows = []
+for rank, etf in enumerate(trending_etfs, start=1):
+    series = trending_pivot.get(etf["name"], pd.Series(dtype=float))
+    row = {"Rank": rank, "ETF": etf["name"], "Sector": etf["sector"]}
+    for label, days in COMPARISON_PERIODS.items():
+        ret = period_return(series, days)
+        row[label] = round(ret, 2) if ret is not None else None
+    row["Why it's trending"] = etf["note"]
+    trending_rows.append(row)
+
+trending_df = pd.DataFrame(trending_rows)
+st.dataframe(trending_df, use_container_width=True, hide_index=True)
 
 st.caption(f"Data through {df['date'].max().date()}")

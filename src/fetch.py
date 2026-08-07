@@ -1,7 +1,10 @@
-"""Fetch India sector ETF prices via yfinance and upsert into SQLite.
+"""Fetch India ETF prices via yfinance and upsert into SQLite.
+
+Pulls the combined ticker list from config/etfs.yaml and
+config/social_trending_etfs.yaml.
 
 Usage:
-    python src/fetch.py                 # update all ETFs in config/etfs.yaml
+    python src/fetch.py                 # incremental update for all configured ETFs
     python src/fetch.py --full          # re-download full history for all ETFs
 """
 
@@ -14,12 +17,17 @@ import yfinance as yf
 
 from db import get_connection
 
-CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "etfs.yaml"
+CONFIG_DIR = Path(__file__).resolve().parent.parent / "config"
+CONFIG_FILES = ["etfs.yaml", "social_trending_etfs.yaml"]
 
 
 def load_etf_config() -> list[dict]:
-    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    etfs: dict[str, dict] = {}
+    for filename in CONFIG_FILES:
+        with open(CONFIG_DIR / filename, "r", encoding="utf-8") as f:
+            for etf in yaml.safe_load(f):
+                etfs[etf["ticker"]] = etf  # de-dupe tickers shared across files
+    return list(etfs.values())
 
 
 def upsert_etfs(conn, etfs: list[dict]) -> None:

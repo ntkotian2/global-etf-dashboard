@@ -1,0 +1,57 @@
+# Curated snapshot of India NSE ETFs frequently discussed by retail investors on
+# social media (YouTube finance channels, X/Twitter finance accounts, Facebook
+# investing groups) as of 2026-08. This is a MANUAL, periodically-refreshed list —
+# there is no free API for cross-platform social mention counts, so it is not
+# live-scraped. Re-research and update this file occasionally to keep it current.
+#
+# ticker must match the yfinance symbol (NSE tickers use the ".NS" suffix).
+
+- ticker: NIFTYBEES.NS
+  name: Nippon India ETF Nifty BeES
+  sector: Broad Market
+  note: Most widely recommended ETF for beginner SIPs across finance YouTube/X
+
+- ticker: GOLDBEES.NS
+  name: Nippon India ETF Gold BeES
+  sector: Gold
+  note: Heavily discussed as a gold-hedge alternative to physical gold
+
+- ticker: SILVERBEES.NS
+  name: Nippon India ETF Silver BeES
+  sector: Silver
+  note: Trending on social media following the 2025-2026 silver price rally
+
+- ticker: BANKBEES.NS
+  name: Nippon India ETF Bank BeES
+  sector: Banking
+  note: Most popular sector-bet ETF among retail bank-sector bulls
+
+- ticker: JUNIORBEES.NS
+  name: Nippon India ETF Nifty Next 50
+  sector: Broad Market (Next 50)
+  note: Frequently pitched as a higher-growth alternative to Nifty 50
+
+- ticker: CPSEETF.NS
+  name: CPSE ETF
+  sector: PSU / Energy
+  note: Popular PSU/dividend-yield pick discussed in value-investing circles
+
+- ticker: MOREALTY.NS
+  name: Motilal Oswal Nifty Realty ETF
+  sector: Realty
+  note: Frequently discussed as a high-volatility realty-sector momentum play
+
+- ticker: PVTBANIETF.NS
+  name: Nifty Private Bank ETF
+  sector: Private Banking
+  note: Common alternative to BANKBEES for private-bank-only exposure
+
+- ticker: MON100.NS
+  name: Motilal Oswal Nasdaq 100 ETF
+  sector: US Tech (Nasdaq 100)
+  note: Top pick among creators pushing US tech diversification
+
+- ticker: SETFNIF50.NS
+  name: SBI ETF Nifty 50
+  sector: Broad Market
+  note: Large-AUM Nifty 50 ETF often recommended for its low tracking error
