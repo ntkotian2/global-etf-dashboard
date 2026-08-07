@@ -60,17 +60,38 @@ pivot = filtered.pivot_table(index="date", columns="name", values="close")
 normalized = pivot / pivot.bfill().iloc[0] * 100
 st.line_chart(normalized)
 
-st.subheader("Returns over selected period")
-returns = []
-for name, series in pivot.items():
-    series = series.dropna()
-    if len(series) < 2:
-        continue
-    ret_pct = (series.iloc[-1] / series.iloc[0] - 1) * 100
-    sector = df.loc[df["name"] == name, "sector"].iloc[0]
-    returns.append({"ETF": name, "Sector": sector, "Return %": round(ret_pct, 2)})
+st.subheader("Returns comparison")
+COMPARISON_PERIODS = {"3M Return %": 90, "6M Return %": 182, "1Y Return %": 365}
 
-returns_df = pd.DataFrame(returns).sort_values("Return %", ascending=False)
-st.dataframe(returns_df, use_container_width=True, hide_index=True)
+full_pivot = df[df["sector"].isin(selected_sectors)].pivot_table(
+    index="date", columns="name", values="close"
+)
+
+
+def period_return(series: pd.Series, days: int) -> float | None:
+    series = series.dropna()
+    if series.empty:
+        return None
+    cutoff_date = pd.Timestamp(date.today() - timedelta(days=days))
+    eligible = series[series.index >= cutoff_date]
+    if eligible.empty:
+        return None
+    start_price = eligible.iloc[0]
+    if start_price == 0:
+        return None
+    return (series.iloc[-1] / start_price - 1) * 100
+
+
+comparison = []
+for name, series in full_pivot.items():
+    sector = df.loc[df["name"] == name, "sector"].iloc[0]
+    row = {"ETF": name, "Sector": sector}
+    for label, days in COMPARISON_PERIODS.items():
+        ret = period_return(series, days)
+        row[label] = round(ret, 2) if ret is not None else None
+    comparison.append(row)
+
+comparison_df = pd.DataFrame(comparison).sort_values("1Y Return %", ascending=False)
+st.dataframe(comparison_df, use_container_width=True, hide_index=True)
 
 st.caption(f"Data through {df['date'].max().date()}")
