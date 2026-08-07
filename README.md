@@ -29,6 +29,26 @@ streamlit run src/dashboard.py
 Lets you pick sectors and a time window, and shows normalized performance lines plus
 a sortable returns table.
 
+## Auto-start on login
+
+`scripts/startup_all.vbs` runs `fetch.py` then launches the dashboard, both hidden
+(no console windows). A copy is installed in your Windows Startup folder so this runs
+automatically every time you log in, and the dashboard stays reachable at
+`http://localhost:8501` — bookmark it.
+
+Logs go to `logs/fetch.log` and `logs/dashboard.log`.
+
+To remove the auto-start, delete:
+```
+%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\IndiaETF-Startup.vbs
+```
+and kill the running `python` process (Task Manager, or `taskkill /IM python.exe /F`).
+
+To reinstall/update it after editing `scripts/startup_all.vbs`:
+```powershell
+Copy-Item scripts\startup_all.vbs "$([Environment]::GetFolderPath('Startup'))\IndiaETF-Startup.vbs" -Force
+```
+
 ## Adding/removing ETFs
 
 Edit [config/etfs.yaml](config/etfs.yaml) — add a ticker (must be a valid yfinance
