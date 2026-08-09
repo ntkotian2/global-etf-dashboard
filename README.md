@@ -15,8 +15,10 @@ social-media-trending ETFs.
 
 **Live dashboard**: https://global-etf-database.streamlit.app/
 
-**JSON API** (open, no key needed): https://global-etf-database.streamlit.app/app/static/api/index.json
-— see [API](#api) below.
+**JSON API** (open, no key needed): a separate small service, not yet deployed publicly
+— see [API](#api) below for why, and for deploy instructions.
+
+**MCP server**: lets Claude query this data directly — see [MCP server](#mcp-server) below.
 
 ## Setup
 
@@ -96,7 +98,8 @@ use `.TO`, US tickers need no suffix.
 ```
 src/
   app.py          # entry point (streamlit run src/app.py) — defines page navigation
-  common.py       # shared helpers used by every market page
+  common.py       # Streamlit rendering helpers used by every market page
+  api_data.py     # pure data computation, shared by common.py and api-server (no Streamlit dep)
   db.py           # SQLite schema + connection
   fetch.py        # pulls prices via yfinance, upserts into SQLite
   pages/
@@ -105,45 +108,117 @@ src/
     usa.py        # USA page
     usa_ai.py     # USA AI/robotics thematic page
     canada.py     # Canada page
-  static/api/     # generated JSON snapshots served at /app/static/api/ — see API below
+  static/api/     # generated JSON snapshots served at /app/static/api/ locally only — see API below
 .streamlit/
-  config.toml     # enableStaticServing = true, required for the API
+  config.toml     # enableStaticServing = true (local-only, see API section)
+api-server/       # standalone FastAPI service — the real public API, see API below
+  main.py
+  requirements.txt
+mcp-server/       # MCP server wrapping api-server as Claude-usable tools, see MCP server below
+  server.py
+  requirements.txt
+render.yaml       # Render blueprint for deploying api-server
 ```
 
 ## API
 
 A read-only, unauthenticated JSON snapshot of everything the dashboard shows
-is served as static files, so any script or AI agent can pull the data with
-a plain HTTP GET — no key, no rate limit, no auth:
+— `etfs` (latest price + 3M/6M/1Y returns per ticker), `sectors` (average
+returns per sector), `sector_rotation` (the momentum-shift signal), and
+`trending` (the curated social-trending list) — computed by
+[src/api_data.py](src/api_data.py)'s `build_market_api_payload`, shared by
+both the dashboard and the API below so the numbers always match.
 
-```
-GET https://global-etf-database.streamlit.app/app/static/api/index.json    # discovery doc: schema + endpoint list
-GET https://global-etf-database.streamlit.app/app/static/api/india.json    # one market
-GET https://global-etf-database.streamlit.app/app/static/api/usa.json
-GET https://global-etf-database.streamlit.app/app/static/api/usa-ai.json
-GET https://global-etf-database.streamlit.app/app/static/api/canada.json
-GET https://global-etf-database.streamlit.app/app/static/api/all.json      # every market combined
-```
+### Why a separate service
 
-Each market file has `etfs` (latest price + 3M/6M/1Y returns per ticker),
-`sectors` (average returns per sector), `sector_rotation` (the momentum-shift
-signal), and `trending` (the curated social-trending list) — the exact same
-numbers the dashboard renders, computed by
-[common.py](src/common.py)'s `build_market_api_payload`.
-
-How it works: Streamlit Community Cloud only runs the one dashboard process
-(no separate API server), so this uses Streamlit's built-in
+The first attempt used Streamlit's built-in
 [static file serving](https://docs.streamlit.io/develop/concepts/configuration/serving-static-files)
-(`enableStaticServing` in [.streamlit/config.toml](.streamlit/config.toml)) —
-files under `src/static/` are served as-is at `/app/static/...`. Each
-market's JSON is (re)written by `load_data()` in `common.py` on the same
-1-hour self-refresh cycle as the dashboard's own data, so it self-heals the
-first time each market page is visited after a restart. These generated
-files aren't committed to git (see `.gitignore`) — only `index.json` is,
-since it's hand-written docs rather than a data snapshot. That also means a
-market's endpoint can briefly 404 right after a fresh deploy until someone
-(a browser visit, or your own script) loads that market's page at least
-once.
+(`enableStaticServing`, still in [.streamlit/config.toml](.streamlit/config.toml))
+to expose JSON at `/app/static/api/...` directly from the dashboard, with no
+extra hosting. It works when running locally
+(`http://localhost:8501/app/static/api/india.json`) but **not** on Streamlit
+Community Cloud: that platform now runs apps behind a gateway (its own
+`/-/build/assets/...`, `/-/auth/...` routes) that only proxies known
+Streamlit routes through to the app process — confirmed by testing that even
+Streamlit's *own* built-in static assets (`favicon.png`, `manifest.json`) get
+served the gateway's app shell instead of their real content on this
+platform. So the public API is instead [api-server/](api-server/), a small
+standalone FastAPI service with its own SQLite database (same self-refresh
+pattern as the dashboard, via yfinance).
+
+### Endpoints
+
+Once deployed (see below), replace `<api-url>` with wherever you hosted it:
+
+```
+GET <api-url>/            # discovery doc: schema + endpoint list
+GET <api-url>/india       # one market
+GET <api-url>/usa
+GET <api-url>/usa-ai
+GET <api-url>/canada
+GET <api-url>/all         # every market combined
+GET <api-url>/healthz     # health check
+```
+
+### Deploying api-server
+
+Any Python host works; [Render](https://render.com)'s free tier is the path
+of least friction and this repo includes [render.yaml](render.yaml) for it:
+
+1. On [render.com](https://render.com), **New** → **Blueprint**, connect
+   this GitHub repo. Render reads `render.yaml` and creates the service
+   automatically (root dir `api-server`, free plan, health check `/healthz`).
+2. Or manually: **New** → **Web Service** → connect the repo → root
+   directory `api-server` → build command `pip install -r requirements.txt`
+   → start command `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+3. Render gives you a URL like `https://global-etf-database-api.onrender.com`.
+   Free-tier services sleep after inactivity and take ~30s to wake on the
+   next request — same self-heal-on-first-request pattern as the rest of
+   this project, just with a cold-start delay.
+
+Locally: `cd api-server && pip install -r requirements.txt && uvicorn main:app --reload --port 8000`.
+
+## MCP server
+
+[mcp-server/](mcp-server/) wraps the API above as an
+[MCP](https://modelcontextprotocol.io) server, so Claude (or any other MCP
+client) can query live ETF data as tools instead of you pasting URLs into
+chat: `list_markets`, `get_market_snapshot`, `get_etf`,
+`get_sector_performance`, `get_sector_rotation`, `get_trending`,
+`get_all_markets`.
+
+Setup:
+```
+cd mcp-server
+pip install -r requirements.txt
+```
+
+Set `ETF_API_BASE_URL` to your deployed api-server URL (defaults to
+`http://localhost:8000` for local dev).
+
+**Claude Desktop** — add to `claude_desktop_config.json`
+(`%APPDATA%\Claude\claude_desktop_config.json` on Windows):
+```json
+{
+  "mcpServers": {
+    "etf-tracker": {
+      "command": "python",
+      "args": ["C:\\Users\\ntkot\\Documents\\GitHub\\global-etf-database\\mcp-server\\server.py"],
+      "env": { "ETF_API_BASE_URL": "https://<your-render-url>" }
+    }
+  }
+}
+```
+Restart Claude Desktop after editing.
+
+**Claude Code**:
+```
+claude mcp add etf-tracker --env ETF_API_BASE_URL=https://<your-render-url> -- python "C:\Users\ntkot\Documents\GitHub\global-etf-database\mcp-server\server.py"
+```
+
+**claude.ai (web/mobile Custom Connectors)** needs a *remote* MCP server
+(reachable over HTTPS), not this stdio-based one — a further step beyond
+what's built here if you want it on that surface too.
 
 ## Data source
 
