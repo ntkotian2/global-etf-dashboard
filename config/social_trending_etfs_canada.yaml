@@ -1,0 +1,59 @@
+# Curated snapshot of Canada (TSX) ETFs frequently discussed by retail
+# investors on social media (YouTube finance channels, X/Twitter, Reddit
+# communities like r/PersonalFinanceCanada, r/CanadianInvestor) as of
+# 2026-08. This is a MANUAL, periodically-refreshed list -- there is no free
+# API for cross-platform social mention counts, so it is not live-scraped.
+# Leveraged/inverse products are deliberately excluded to keep this
+# plain-vanilla.
+#
+# ticker must match the yfinance symbol (TSX tickers use the ".TO" suffix).
+
+- ticker: XEQT.TO
+  name: iShares Core Equity ETF Portfolio
+  sector: Multi-Asset Allocation (All-Equity)
+  note: The most commonly recommended "one-ticket" ETF for beginners on r/PersonalFinanceCanada
+
+- ticker: VEQT.TO
+  name: Vanguard All-Equity ETF Portfolio
+  sector: Multi-Asset Allocation (All-Equity)
+  note: The other half of the classic "XEQT vs VEQT" debate that dominates Canadian investing forums
+
+- ticker: VFV.TO
+  name: Vanguard S&P 500 Index ETF
+  sector: US Broad Market
+  note: The most popular CAD-denominated way to get pure US S&P 500 exposure
+
+- ticker: XIU.TO
+  name: iShares S&P/TSX 60 Index ETF
+  sector: Broad Market (TSX 60)
+  note: The world's first ETF (launched 1990) and still the iconic Canadian benchmark
+
+- ticker: VGRO.TO
+  name: Vanguard Growth ETF Portfolio
+  sector: Multi-Asset Allocation (Growth)
+  note: Popular one-ticket 80/20 equity-bond portfolio for hands-off investors
+
+- ticker: VBAL.TO
+  name: Vanguard Balanced ETF Portfolio
+  sector: Multi-Asset Allocation (Balanced)
+  note: Popular one-ticket 60/40 balanced portfolio, frequently recommended for lower risk tolerance
+
+- ticker: ZLB.TO
+  name: BMO Low Volatility Canadian Equity ETF
+  sector: Low Volatility Factor
+  note: Widely discussed defensive pick among Canadian dividend/value investors
+
+- ticker: XGD.TO
+  name: iShares S&P/TSX Global Gold Index ETF
+  sector: Gold Mining
+  note: Trending alongside the 2025-2026 gold price rally
+
+- ticker: HMMJ.TO
+  name: Global X Marijuana Life Sciences Index ETF
+  sector: Cannabis
+  note: Classic Canadian cannabis-theme ETF, periodically resurges in retail discussion
+
+- ticker: ZEB.TO
+  name: BMO Equal Weight Banks Index ETF
+  sector: Banking
+  note: Canadian bank dividend investing is a perennial favorite discussion topic

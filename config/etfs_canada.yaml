@@ -40,3 +40,81 @@
 - ticker: XGD.TO
   name: iShares S&P/TSX Global Gold Index ETF
   sector: Gold Mining
+
+# --- Added for full taxonomy chart coverage (2026-08-09) ---
+
+- ticker: XCS.TO
+  name: iShares S&P/TSX Small Cap Index ETF
+  sector: Small Cap
+
+- ticker: ZIN.TO
+  name: BMO Equal Weight Industrials Index ETF
+  sector: Industrials
+
+- ticker: HMMJ.TO
+  name: Global X Marijuana Life Sciences Index ETF
+  sector: Cannabis
+
+- ticker: ZCLN.TO
+  name: BMO Clean Energy Index ETF
+  sector: Clean Energy
+
+- ticker: ZVC.TO
+  name: BMO MSCI Canada Value Index ETF
+  sector: Value Factor
+
+- ticker: ZLB.TO
+  name: BMO Low Volatility Canadian Equity ETF
+  sector: Low Volatility Factor
+
+- ticker: XDIV.TO
+  name: iShares Core MSCI Canadian Quality Dividend Index ETF
+  sector: Dividend
+
+- ticker: XESG.TO
+  name: iShares ESG Aware MSCI Canada Index ETF
+  sector: ESG
+
+- ticker: XGB.TO
+  name: iShares Core Canadian Government Bond Index ETF
+  sector: Canadian Government Bond
+
+- ticker: XCB.TO
+  name: iShares Core Canadian Corporate Bond Index ETF
+  sector: Canadian Corporate Bond
+
+- ticker: XBB.TO
+  name: iShares Core Canadian Universe Bond Index ETF
+  sector: Canadian Aggregate Bond
+
+- ticker: XSB.TO
+  name: iShares Core Canadian Short Term Bond Index ETF
+  sector: Short-Term Bond
+
+- ticker: CGL.TO
+  name: iShares Gold Bullion ETF (CAD-Hedged)
+  sector: Gold
+
+- ticker: SVR.TO
+  name: iShares Silver Bullion ETF (CAD-Hedged)
+  sector: Silver
+
+- ticker: XUS.TO
+  name: iShares Core S&P 500 Index ETF
+  sector: US Broad Market
+
+- ticker: XEF.TO
+  name: iShares Core MSCI EAFE IMI Index ETF
+  sector: International Developed (EAFE)
+
+- ticker: XEC.TO
+  name: iShares Core MSCI Emerging Markets IMI Index ETF
+  sector: Emerging Markets
+
+- ticker: VGRO.TO
+  name: Vanguard Growth ETF Portfolio
+  sector: Multi-Asset Allocation (Growth)
+
+- ticker: VBAL.TO
+  name: Vanguard Balanced ETF Portfolio
+  sector: Multi-Asset Allocation (Balanced)

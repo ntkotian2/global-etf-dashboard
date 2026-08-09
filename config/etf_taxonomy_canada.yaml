@@ -1,0 +1,147 @@
+# Top-down classification of the Canada (TSX) ETF universe: Asset Class ->
+# Category -> Sector/Theme. Canada's ETF market is much smaller/less diverse
+# than the US or India -- three leaves (Quality, Telecom, Consumer) stay
+# untracked/gray because no direct TSX-listed ETF product could be found for
+# them, rather than forcing a bad-fit substitution.
+#
+# `tracked_sector`, when set, must match a `sector` value in
+# config/etfs_canada.yaml exactly -- the dashboard uses it to filter the
+# returns table when this leaf is clicked. Leave it blank/omitted for
+# sectors/themes not yet in the tracker.
+
+- level1: Equity
+  level2: Broad Market
+  leaf: TSX 60
+  tracked_sector: Broad Market (TSX 60)
+- level1: Equity
+  level2: Broad Market
+  leaf: TSX Composite
+  tracked_sector: Broad Market (TSX Composite)
+- level1: Equity
+  level2: Broad Market
+  leaf: Small Cap
+  tracked_sector: Small Cap
+
+- level1: Equity
+  level2: Sectoral
+  leaf: Banking
+  tracked_sector: Banking
+- level1: Equity
+  level2: Sectoral
+  leaf: Financials
+  tracked_sector: Financials
+- level1: Equity
+  level2: Sectoral
+  leaf: Energy
+  tracked_sector: Energy
+- level1: Equity
+  level2: Sectoral
+  leaf: Materials
+  tracked_sector: Materials
+- level1: Equity
+  level2: Sectoral
+  leaf: Real Estate
+  tracked_sector: Real Estate
+- level1: Equity
+  level2: Sectoral
+  leaf: Technology
+  tracked_sector: Technology
+- level1: Equity
+  level2: Sectoral
+  leaf: Utilities
+  tracked_sector: Utilities
+- level1: Equity
+  level2: Sectoral
+  leaf: Gold Mining
+  tracked_sector: Gold Mining
+- level1: Equity
+  level2: Sectoral
+  leaf: Telecom
+  # No standalone TSX-listed telecom sector ETF found as of 2026-08
+- level1: Equity
+  level2: Sectoral
+  leaf: Industrials
+  tracked_sector: Industrials
+- level1: Equity
+  level2: Sectoral
+  leaf: Consumer
+  # No standalone TSX-listed consumer sector ETF found as of 2026-08
+
+- level1: Equity
+  level2: Thematic
+  leaf: Cannabis
+  tracked_sector: Cannabis
+- level1: Equity
+  level2: Thematic
+  leaf: Clean Energy
+  tracked_sector: Clean Energy
+
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Value
+  tracked_sector: Value Factor
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Quality
+  # No Canadian-equity quality-factor ETF found (only US-equity versions exist on TSX)
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Low Volatility
+  tracked_sector: Low Volatility Factor
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Dividend
+  tracked_sector: Dividend
+
+- level1: Equity
+  level2: ESG
+  leaf: ESG
+  tracked_sector: ESG
+
+- level1: Debt
+  level2: Government Bond
+  leaf: Canadian Government Bond
+  tracked_sector: Canadian Government Bond
+- level1: Debt
+  level2: Corporate Bond
+  leaf: Canadian Corporate Bond
+  tracked_sector: Canadian Corporate Bond
+- level1: Debt
+  level2: Aggregate Bond
+  leaf: Canadian Aggregate Bond
+  tracked_sector: Canadian Aggregate Bond
+- level1: Debt
+  level2: Short-Term Bond
+  leaf: Short-Term Bond
+  tracked_sector: Short-Term Bond
+
+- level1: Commodity
+  level2: Precious Metals
+  leaf: Gold
+  tracked_sector: Gold
+- level1: Commodity
+  level2: Precious Metals
+  leaf: Silver
+  tracked_sector: Silver
+
+- level1: International
+  level2: US Equity
+  leaf: US Broad Market
+  tracked_sector: US Broad Market
+- level1: International
+  level2: Developed Markets
+  leaf: International Developed (EAFE)
+  tracked_sector: International Developed (EAFE)
+- level1: International
+  level2: Emerging Markets
+  leaf: Emerging Markets
+  tracked_sector: Emerging Markets
+
+- level1: Hybrid
+  level2: Multi-Asset Allocation
+  leaf: Multi-Asset Allocation (Growth)
+  tracked_sector: Multi-Asset Allocation (Growth)
+- level1: Hybrid
+  level2: Multi-Asset Allocation
+  leaf: Multi-Asset Allocation (Balanced)
+  tracked_sector: Multi-Asset Allocation (Balanced)
