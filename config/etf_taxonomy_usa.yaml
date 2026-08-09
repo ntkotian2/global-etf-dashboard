@@ -103,10 +103,6 @@
   tracked_sector: Biotech
 - level1: Equity
   level2: Thematic
-  leaf: Robotics & AI
-  tracked_sector: Robotics & AI
-- level1: Equity
-  level2: Thematic
   leaf: Homebuilders
   tracked_sector: Homebuilders
 

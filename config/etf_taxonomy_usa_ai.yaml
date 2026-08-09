@@ -1,0 +1,46 @@
+# Top-down classification of the USA-AI ETF universe -- end-to-end across
+# the AI value chain (models/software, robotics, chips, data-center
+# infrastructure, power) -- broad AI category -> theme -> sub-theme.
+# `tracked_sector` must match a `sector` value in config/etfs_usa_ai.yaml
+# exactly -- the dashboard uses it to filter the returns table when this
+# leaf is clicked.
+
+- level1: Hardware & Robotics
+  level2: Physical AI
+  leaf: Robotics & Automation
+  tracked_sector: Robotics & Automation
+
+- level1: Broad / Multi-Sector
+  level2: Diversified AI
+  leaf: Broad / Diversified AI
+  tracked_sector: Broad / Diversified AI
+
+- level1: Software & Applications
+  level2: Generative AI
+  leaf: AI Software & Applications
+  tracked_sector: AI Software & Applications
+
+- level1: Emerging Compute
+  level2: Quantum
+  leaf: Quantum Computing & AI
+  tracked_sector: Quantum Computing & AI
+
+- level1: Compute & Chips
+  level2: Semiconductors
+  leaf: Semiconductors & AI Chips
+  tracked_sector: Semiconductors & AI Chips
+
+- level1: Physical Infrastructure
+  level2: Data Centers
+  leaf: Data Center Infrastructure
+  tracked_sector: Data Center Infrastructure
+
+- level1: Physical Infrastructure
+  level2: Power
+  leaf: Power for AI - Nuclear
+  tracked_sector: Power for AI - Nuclear
+
+- level1: Physical Infrastructure
+  level2: Power
+  leaf: Power for AI - Grid
+  tracked_sector: Power for AI - Grid

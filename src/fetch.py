@@ -26,6 +26,8 @@ CONFIG_FILES = {
     "social_trending_etfs_usa.yaml": "USA",
     "etfs_canada.yaml": "Canada",
     "social_trending_etfs_canada.yaml": "Canada",
+    "etfs_usa_ai.yaml": "USA-AI",
+    "social_trending_etfs_usa_ai.yaml": "USA-AI",
 }
 
 

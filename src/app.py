@@ -12,6 +12,7 @@ pages = [
     st.Page("pages/home.py", title="Home", icon="🏠", default=True),
     st.Page("pages/india.py", title="India", icon="🇮🇳"),
     st.Page("pages/usa.py", title="USA", icon="🇺🇸"),
+    st.Page("pages/usa_ai.py", title="USA - AI", icon="🤖"),
     st.Page("pages/canada.py", title="Canada", icon="🇨🇦"),
 ]
 

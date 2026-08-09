@@ -1,0 +1,82 @@
+# USA-listed AI ETFs, end-to-end across the AI value chain: pure-play AI/
+# robotics funds plus the physical buildout (chips, data centers/networking,
+# power). ticker must match the yfinance symbol (US tickers need no suffix).
+# Leveraged/inverse products (e.g. UBOT) are deliberately excluded, consistent
+# with the other USA config files. BOTZ lives here (not in etfs_usa.yaml) --
+# a ticker can only belong to one market at a time since the etfs table keys
+# on ticker alone.
+#
+# Data Center Infrastructure (SRVR, DTCR) is the closest available ETF proxy
+# for server racks and data-center networking/cabling -- no ETF tracks racks
+# or cabling specifically, so this is a broader digital-infrastructure fund
+# pair, not a pure-play. Everything else here is a direct thematic match.
+
+- ticker: BOTZ
+  name: Global X Robotics & Artificial Intelligence ETF
+  sector: Robotics & Automation
+
+- ticker: ROBO
+  name: ROBO Global Robotics and Automation Index ETF
+  sector: Robotics & Automation
+
+- ticker: ARKQ
+  name: ARK Autonomous Technology & Robotics ETF
+  sector: Robotics & Automation
+
+- ticker: IRBO
+  name: iShares Robotics and Artificial Intelligence Multisector ETF
+  sector: Broad / Diversified AI
+
+- ticker: AIQ
+  name: Global X Artificial Intelligence & Technology ETF
+  sector: Broad / Diversified AI
+
+- ticker: THNQ
+  name: ROBO Global Artificial Intelligence ETF
+  sector: Broad / Diversified AI
+
+- ticker: WTAI
+  name: WisdomTree Artificial Intelligence and Innovation Fund
+  sector: Broad / Diversified AI
+
+- ticker: LOUP
+  name: Innovator Loup Frontier Tech ETF
+  sector: Broad / Diversified AI
+
+- ticker: CHAT
+  name: Roundhill Generative AI & Technology ETF
+  sector: AI Software & Applications
+
+- ticker: QTUM
+  name: Defiance Quantum ETF
+  sector: Quantum Computing & AI
+
+# --- AI infrastructure buildout: chips, data centers, power (2026-08-09) ---
+
+- ticker: SMH
+  name: VanEck Semiconductor ETF
+  sector: Semiconductors & AI Chips
+
+- ticker: PSI
+  name: Invesco Dynamic Semiconductors ETF
+  sector: Semiconductors & AI Chips
+
+- ticker: SRVR
+  name: Pacer Data & Infrastructure Real Estate ETF
+  sector: Data Center Infrastructure
+
+- ticker: DTCR
+  name: Global X Data Center & Digital Infrastructure ETF
+  sector: Data Center Infrastructure
+
+- ticker: URA
+  name: Global X Uranium ETF
+  sector: Power for AI - Nuclear
+
+- ticker: NLR
+  name: VanEck Uranium and Nuclear ETF
+  sector: Power for AI - Nuclear
+
+- ticker: GRID
+  name: First Trust Nasdaq Clean Edge Smart Grid Infrastructure ETF
+  sector: Power for AI - Grid

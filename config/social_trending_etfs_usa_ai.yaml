@@ -1,0 +1,42 @@
+# Curated snapshot of AI/robotics-themed ETFs frequently discussed by retail
+# investors on social media (YouTube finance channels, X/Twitter finance
+# accounts, Reddit communities like r/ETFs) as of 2026-08. This is a MANUAL,
+# periodically-refreshed list -- there is no free API for cross-platform
+# social mention counts, so it is not live-scraped.
+#
+# ticker must match the yfinance symbol (US tickers need no suffix).
+
+- ticker: BOTZ
+  name: Global X Robotics & Artificial Intelligence ETF
+  sector: Robotics & Automation
+  note: The original and most-recognized pure-play robotics/AI ETF, a go-to reference across finance YouTube
+
+- ticker: AIQ
+  name: Global X Artificial Intelligence & Technology ETF
+  sector: Broad / Diversified AI
+  note: Frequently recommended as the "broad AI exposure" pick alongside QQQ on r/ETFs
+
+- ticker: ARKQ
+  name: ARK Autonomous Technology & Robotics ETF
+  sector: Robotics & Automation
+  note: Cathie Wood's autonomous-tech fund, riding the same attention as ARKK
+
+- ticker: CHAT
+  name: Roundhill Generative AI & Technology ETF
+  sector: AI Software & Applications
+  note: Named directly after the generative-AI boom, widely discussed since the ChatGPT-driven AI rally
+
+- ticker: QTUM
+  name: Defiance Quantum ETF
+  sector: Quantum Computing & AI
+  note: Rising retail interest pairing quantum computing with AI infrastructure narratives
+
+- ticker: SMH
+  name: VanEck Semiconductor ETF
+  sector: Semiconductors & AI Chips
+  note: The core "AI picks and shovels" trade, tracking the chipmakers powering the AI buildout
+
+- ticker: URA
+  name: Global X Uranium ETF
+  sector: Power for AI - Nuclear
+  note: Surging retail attention as hyperscalers sign nuclear power deals to feed AI data centers

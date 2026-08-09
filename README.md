@@ -4,10 +4,14 @@ Tracks daily sector ETF prices across **India** (NSE), **USA**, and **Canada**
 (TSX), stores history in a local SQLite database, and provides a multi-page
 dashboard for comparing sector performance within each market.
 
-- **India**: full-featured — top-down sector/theme classification chart,
-  sector performance, returns comparison, social-media-trending ETFs.
-- **USA / Canada**: sector performance + returns comparison (India's extra
-  sections haven't been built out for these yet).
+All four market pages are full-featured: top-down sector/theme classification
+chart, sector performance, returns comparison, sector rotation, and
+social-media-trending ETFs.
+
+- **India**, **USA**, **Canada**: broad market-wide sector ETFs.
+- **USA – AI**: a thematic sub-page tracking pure-play AI/robotics ETFs
+  (BOTZ, ROBO, AIQ, ARKQ, etc.), grouped by AI sub-theme instead of GICS
+  sector.
 
 **Live dashboard**: https://global-etf-database.streamlit.app/
 
@@ -25,8 +29,8 @@ python src/fetch.py --full   # re-download full history for every ETF
 ```
 
 This populates `data/etfs.db` (SQLite) from every config file in
-`src/fetch.py`'s `CONFIG_FILES` map (India, USA, Canada). Re-run periodically
-(e.g. daily after market close) to keep the database current.
+`src/fetch.py`'s `CONFIG_FILES` map (India, USA, USA-AI, Canada). Re-run
+periodically (e.g. daily after market close) to keep the database current.
 
 ## View the dashboard
 
@@ -34,9 +38,9 @@ This populates `data/etfs.db` (SQLite) from every config file in
 streamlit run src/app.py
 ```
 
-Opens on a Home page with links to India / USA / Canada. Each market page
-lets you pick sectors and a time window, and shows normalized performance
-lines plus a sortable returns table.
+Opens on a Home page with links to India / USA / USA-AI / Canada. Each
+market page lets you pick sectors and a time window, and shows normalized
+performance lines plus a sortable returns table.
 
 Or skip the local setup entirely and use the hosted version:
 https://global-etf-database.streamlit.app/
@@ -66,9 +70,20 @@ Copy-Item scripts\startup_all.vbs "$([Environment]::GetFolderPath('Startup'))\In
 Edit the relevant config file, then re-run `fetch.py`:
 - [config/etfs.yaml](config/etfs.yaml) — India sector ETFs
 - [config/etfs_usa.yaml](config/etfs_usa.yaml) — USA sector ETFs
+- [config/etfs_usa_ai.yaml](config/etfs_usa_ai.yaml) — USA AI/robotics thematic ETFs
 - [config/etfs_canada.yaml](config/etfs_canada.yaml) — Canada sector ETFs
 - [config/social_trending_etfs.yaml](config/social_trending_etfs.yaml) — India social-trending list
+- [config/social_trending_etfs_usa.yaml](config/social_trending_etfs_usa.yaml) — USA social-trending list
+- [config/social_trending_etfs_usa_ai.yaml](config/social_trending_etfs_usa_ai.yaml) — USA-AI social-trending list
+- [config/social_trending_etfs_canada.yaml](config/social_trending_etfs_canada.yaml) — Canada social-trending list
 - [config/etf_taxonomy.yaml](config/etf_taxonomy.yaml) — India's classification chart structure
+- [config/etf_taxonomy_usa.yaml](config/etf_taxonomy_usa.yaml) — USA's classification chart structure
+- [config/etf_taxonomy_usa_ai.yaml](config/etf_taxonomy_usa_ai.yaml) — USA-AI's classification chart structure
+- [config/etf_taxonomy_canada.yaml](config/etf_taxonomy_canada.yaml) — Canada's classification chart structure
+
+Note: a ticker can only belong to one market at a time (the database keys
+ETFs by ticker alone) — don't add the same ticker to two different config
+files.
 
 `ticker` must be a valid yfinance symbol: NSE tickers use `.NS`, TSX tickers
 use `.TO`, US tickers need no suffix.
@@ -83,8 +98,9 @@ src/
   fetch.py        # pulls prices via yfinance, upserts into SQLite
   pages/
     home.py       # landing page with links to each market
-    india.py      # full-featured India page
+    india.py      # India page
     usa.py        # USA page
+    usa_ai.py     # USA AI/robotics thematic page
     canada.py     # Canada page
 ```
 
