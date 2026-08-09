@@ -9,6 +9,8 @@ dashboard for comparing sector performance within each market.
 - **USA / Canada**: sector performance + returns comparison (India's extra
   sections haven't been built out for these yet).
 
+**Live dashboard**: https://global-etf-database.streamlit.app/
+
 ## Setup
 
 ```
@@ -35,6 +37,9 @@ streamlit run src/app.py
 Opens on a Home page with links to India / USA / Canada. Each market page
 lets you pick sectors and a time window, and shows normalized performance
 lines plus a sortable returns table.
+
+Or skip the local setup entirely and use the hosted version:
+https://global-etf-database.streamlit.app/
 
 ## Auto-start on login
 
