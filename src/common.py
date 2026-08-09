@@ -52,6 +52,12 @@ def load_data(market: str) -> pd.DataFrame:
     return df
 
 
+def broker_ticker(ticker: str) -> str:
+    """Strip the yfinance exchange suffix (.NS, .TO) so the symbol matches
+    what you'd actually type into a broker's search box."""
+    return ticker.split(".")[0]
+
+
 def period_return(series: pd.Series, days: int) -> float | None:
     series = series.dropna()
     if series.empty:
@@ -85,8 +91,8 @@ def render_returns_comparison_table(df: pd.DataFrame, selected_sectors: list[str
 
     comparison = []
     for name, series in full_pivot.items():
-        sector = df.loc[df["name"] == name, "sector"].iloc[0]
-        row = {"ETF": name, "Sector": sector}
+        etf_row = df.loc[df["name"] == name].iloc[0]
+        row = {"Ticker": broker_ticker(etf_row["ticker"]), "ETF": name, "Sector": etf_row["sector"]}
         for label, days in COMPARISON_PERIODS.items():
             ret = period_return(series, days)
             row[label] = round(ret, 2) if ret is not None else None
@@ -268,7 +274,12 @@ def render_trending_table(trending_config_path: Path, df: pd.DataFrame) -> None:
     rows = []
     for rank, etf in enumerate(trending_etfs, start=1):
         series = trending_pivot.get(etf["name"], pd.Series(dtype=float))
-        row = {"Rank": rank, "ETF": etf["name"], "Sector": etf["sector"]}
+        row = {
+            "Rank": rank,
+            "Ticker": broker_ticker(etf["ticker"]),
+            "ETF": etf["name"],
+            "Sector": etf["sector"],
+        }
         for label, days in COMPARISON_PERIODS.items():
             ret = period_return(series, days)
             row[label] = round(ret, 2) if ret is not None else None
