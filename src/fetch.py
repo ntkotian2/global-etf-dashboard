@@ -23,6 +23,7 @@ CONFIG_FILES = {
     "etfs.yaml": "India",
     "social_trending_etfs.yaml": "India",
     "etfs_usa.yaml": "USA",
+    "social_trending_etfs_usa.yaml": "USA",
     "etfs_canada.yaml": "Canada",
 }
 

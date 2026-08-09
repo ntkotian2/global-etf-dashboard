@@ -1,0 +1,225 @@
+# Top-down classification of the US ETF universe: Asset Class -> Category ->
+# Sector/Theme. Based on standard US ETF categorization (GICS 11 sectors,
+# style-box/factor investing, bond market segments, international regions).
+#
+# `tracked_sector`, when set, must match a `sector` value in
+# config/etfs_usa.yaml exactly -- the dashboard uses it to filter the returns
+# table when this leaf is clicked. Leave it blank/omitted for sectors/themes
+# not yet in the tracker.
+
+- level1: Equity
+  level2: Broad Market
+  leaf: S&P 500
+  tracked_sector: Broad Market (S&P 500)
+- level1: Equity
+  level2: Broad Market
+  leaf: Nasdaq 100
+  tracked_sector: Broad Market (Nasdaq 100)
+- level1: Equity
+  level2: Broad Market
+  leaf: Dow Jones Industrial Average
+  tracked_sector: Broad Market (Dow Jones)
+- level1: Equity
+  level2: Broad Market
+  leaf: Total US Market
+  tracked_sector: Total US Market
+- level1: Equity
+  level2: Broad Market
+  leaf: Small Cap
+  tracked_sector: Small Cap
+- level1: Equity
+  level2: Broad Market
+  leaf: Mid Cap
+  tracked_sector: Mid Cap
+
+- level1: Equity
+  level2: Sectoral
+  leaf: Financials
+  tracked_sector: Financials
+- level1: Equity
+  level2: Sectoral
+  leaf: Technology
+  tracked_sector: Technology
+- level1: Equity
+  level2: Sectoral
+  leaf: Health Care
+  tracked_sector: Health Care
+- level1: Equity
+  level2: Sectoral
+  leaf: Energy
+  tracked_sector: Energy
+- level1: Equity
+  level2: Sectoral
+  leaf: Industrials
+  tracked_sector: Industrials
+- level1: Equity
+  level2: Sectoral
+  leaf: Consumer Discretionary
+  tracked_sector: Consumer Discretionary
+- level1: Equity
+  level2: Sectoral
+  leaf: Consumer Staples
+  tracked_sector: Consumer Staples
+- level1: Equity
+  level2: Sectoral
+  leaf: Utilities
+  tracked_sector: Utilities
+- level1: Equity
+  level2: Sectoral
+  leaf: Materials
+  tracked_sector: Materials
+- level1: Equity
+  level2: Sectoral
+  leaf: Real Estate
+  tracked_sector: Real Estate
+- level1: Equity
+  level2: Sectoral
+  leaf: Communication Services
+  tracked_sector: Communication Services
+
+- level1: Equity
+  level2: Thematic
+  leaf: Semiconductors
+  tracked_sector: Semiconductors
+- level1: Equity
+  level2: Thematic
+  leaf: Cybersecurity
+  tracked_sector: Cybersecurity
+- level1: Equity
+  level2: Thematic
+  leaf: Cloud Computing
+  tracked_sector: Cloud Computing
+- level1: Equity
+  level2: Thematic
+  leaf: Clean Energy
+  tracked_sector: Clean Energy
+- level1: Equity
+  level2: Thematic
+  leaf: Innovation / Disruptive Tech
+  tracked_sector: Innovation / Disruptive Tech
+- level1: Equity
+  level2: Thematic
+  leaf: Biotech
+  tracked_sector: Biotech
+- level1: Equity
+  level2: Thematic
+  leaf: Robotics & AI
+  tracked_sector: Robotics & AI
+- level1: Equity
+  level2: Thematic
+  leaf: Homebuilders
+  tracked_sector: Homebuilders
+
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Value
+  tracked_sector: Value Factor
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Growth
+  tracked_sector: Growth Factor
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Quality
+  tracked_sector: Quality Factor
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Momentum
+  tracked_sector: Momentum Factor
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Low Volatility
+  tracked_sector: Low Volatility Factor
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Dividend / High Yield
+  tracked_sector: Dividend / High Yield
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Dividend Growth
+  tracked_sector: Dividend Growth
+
+- level1: Equity
+  level2: ESG
+  leaf: ESG
+  tracked_sector: ESG
+
+- level1: Debt
+  level2: Treasury
+  leaf: Short-Term Treasury
+  tracked_sector: Short-Term Treasury
+- level1: Debt
+  level2: Treasury
+  leaf: Long-Term Treasury
+  tracked_sector: Long-Term Treasury
+- level1: Debt
+  level2: Treasury
+  leaf: TIPS (Inflation-Protected)
+  tracked_sector: TIPS (Inflation-Protected)
+- level1: Debt
+  level2: Corporate Bond
+  leaf: Investment Grade Corporate
+  tracked_sector: Investment Grade Corporate Bond
+- level1: Debt
+  level2: Corporate Bond
+  leaf: High Yield Corporate
+  tracked_sector: High Yield Corporate Bond
+- level1: Debt
+  level2: Broad Bond
+  leaf: Total US Bond Market
+  tracked_sector: Total US Bond Market
+- level1: Debt
+  level2: Municipal Bond
+  leaf: Municipal Bond
+  tracked_sector: Municipal Bond
+
+- level1: Commodity
+  level2: Precious Metals
+  leaf: Gold
+  tracked_sector: Gold
+- level1: Commodity
+  level2: Precious Metals
+  leaf: Silver
+  tracked_sector: Silver
+- level1: Commodity
+  level2: Energy Commodity
+  leaf: Oil & Natural Gas
+  tracked_sector: Oil & Natural Gas
+- level1: Commodity
+  level2: Broad Commodity
+  leaf: Diversified Commodity
+  tracked_sector: Diversified Commodity
+
+- level1: International
+  level2: Developed Markets
+  leaf: Developed ex-US
+  tracked_sector: Developed ex-US
+- level1: International
+  level2: Developed Markets
+  leaf: Europe
+  tracked_sector: Europe
+- level1: International
+  level2: Developed Markets
+  leaf: Japan
+  tracked_sector: Japan
+- level1: International
+  level2: Emerging Markets
+  leaf: Broad Emerging Markets
+  tracked_sector: Emerging Markets
+- level1: International
+  level2: Emerging Markets
+  leaf: China
+  tracked_sector: China
+- level1: International
+  level2: Emerging Markets
+  leaf: India
+  tracked_sector: India (US-listed)
+- level1: International
+  level2: Global
+  leaf: Total International
+  tracked_sector: Total International
+
+- level1: Hybrid
+  level2: Multi-Asset Allocation
+  leaf: Multi-Asset Allocation
+  tracked_sector: Multi-Asset Allocation

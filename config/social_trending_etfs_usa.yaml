@@ -1,0 +1,59 @@
+# Curated snapshot of US ETFs frequently discussed by retail investors on
+# social media (YouTube finance channels, X/Twitter finance accounts, Reddit
+# communities like r/ETFs, r/dividends, r/Bogleheads) as of 2026-08. This is a
+# MANUAL, periodically-refreshed list -- there is no free API for
+# cross-platform social mention counts, so it is not live-scraped.
+# Leveraged/inverse products (e.g. TQQQ, SOXL) are deliberately excluded even
+# where heavily discussed, to keep this list plain-vanilla.
+#
+# ticker must match the yfinance symbol (US tickers need no suffix).
+
+- ticker: SPY
+  name: SPDR S&P 500 ETF Trust
+  sector: Broad Market (S&P 500)
+  note: The single most-mentioned ETF ticker across every retail trading community
+
+- ticker: VOO
+  name: Vanguard S&P 500 ETF
+  sector: Broad Market (S&P 500)
+  note: Lower-fee Boglehead favorite, the most-recommended alternative to SPY
+
+- ticker: QQQ
+  name: Invesco QQQ Trust
+  sector: Broad Market (Nasdaq 100)
+  note: Core AI/tech-trade vehicle amid the ongoing semiconductor and AI rally
+
+- ticker: QQQM
+  name: Invesco NASDAQ 100 ETF
+  sector: Broad Market (Nasdaq 100)
+  note: Lower-fee long-term-hold alternative to QQQ, popular on r/Bogleheads and r/ETFs
+
+- ticker: SCHD
+  name: Schwab U.S. Dividend Equity ETF
+  sector: Dividend / High Yield
+  note: Dividend-growth favorite pulling record inflows, dominant in r/dividends discussion
+
+- ticker: JEPI
+  name: JPMorgan Equity Premium Income ETF
+  sector: Covered Call Income
+  note: Covered-call monthly income fund with a massive YouTube/Reddit following
+
+- ticker: VTI
+  name: Vanguard Total Stock Market ETF
+  sector: Total US Market
+  note: Total-market Boglehead classic, the standard "just buy everything" recommendation
+
+- ticker: ARKK
+  name: ARK Innovation ETF
+  sector: Innovation / Disruptive Tech
+  note: Cathie Wood's flagship fund, among the most-discussed (and debated) ETFs on social media
+
+- ticker: SOXX
+  name: iShares Semiconductor ETF
+  sector: Semiconductors
+  note: Semiconductor exposure riding the AI infrastructure buildout narrative
+
+- ticker: GLD
+  name: SPDR Gold Shares
+  sector: Gold
+  note: Gold-hedge discussion surged alongside the 2025-2026 gold price rally
