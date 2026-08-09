@@ -1,6 +1,8 @@
 # India sector ETFs to track.
 # ticker must match the yfinance symbol (NSE tickers use the ".NS" suffix).
 # Add/remove rows to change what fetch.py pulls and what the dashboard shows.
+# `sector` should match a `tracked_sector` value in config/etf_taxonomy.yaml so
+# the classification chart can color/filter by it.
 
 - ticker: NIFTYBEES.NS
   name: Nippon India ETF Nifty BeES
@@ -41,3 +43,93 @@
 - ticker: MID150BEES.NS
   name: Nippon India ETF Nifty Midcap 150
   sector: Midcap
+
+# --- Added to give the taxonomy chart full coverage (2026-08-08) ---
+
+- ticker: MOSMALL250.NS
+  name: Motilal Oswal Nifty Smallcap 250 ETF
+  sector: Smallcap
+
+- ticker: BSE500IETF.NS
+  name: ICICI Prudential BSE 500 ETF
+  sector: Total Market (BSE 500)
+
+- ticker: FMCGIETF.NS
+  name: ICICI Prudential Nifty FMCG ETF
+  sector: FMCG
+
+- ticker: AUTOBEES.NS
+  name: Nippon India Nifty Auto ETF
+  sector: Auto
+
+- ticker: MOENERGY.NS
+  name: Motilal Oswal Nifty Energy ETF
+  sector: Energy
+
+- ticker: METALIETF.NS
+  name: ICICI Prudential Nifty Metal ETF
+  sector: Metal
+
+- ticker: FINIETF.NS
+  name: ICICI Prudential Nifty Financial Services Ex-Bank ETF
+  sector: Financial Services (Ex-Bank)
+
+- ticker: MAFANG.NS
+  name: Mirae Asset NYSE FANG+ ETF
+  sector: Digital (Global Tech)
+
+- ticker: EVINDIA.NS
+  name: Mirae Asset Nifty EV and New Age Automotive ETF
+  sector: EV & New Age Auto
+
+- ticker: MODEFENCE.NS
+  name: Motilal Oswal Nifty India Defence ETF
+  sector: Defence
+
+- ticker: QUAL30IETF.NS
+  name: ICICI Prudential Nifty Quality 30 ETF
+  sector: Quality Factor
+
+- ticker: NV20BEES.NS
+  name: Nippon India ETF Nifty 50 Value 20
+  sector: Value Factor
+
+- ticker: MOMOMENTUM.NS
+  name: Motilal Oswal Nifty 200 Momentum 30 ETF
+  sector: Momentum Factor
+
+- ticker: DIVOPPBEES.NS
+  name: Nippon India ETF Dividend Opportunities
+  sector: Dividend Opportunities
+
+- ticker: LOWVOLIETF.NS
+  name: ICICI Prudential Nifty Low Vol 30 ETF
+  sector: Low Volatility Factor
+
+- ticker: ALPHAETF.NS
+  name: Mirae Asset Nifty 200 Alpha 30 ETF
+  sector: Alpha Factor
+
+- ticker: ESG.NS
+  name: Mirae Asset ESG Sector Leaders ETF
+  sector: ESG
+
+- ticker: EBBETF0430.NS
+  name: BHARAT Bond ETF April 2030
+  sector: Target Maturity Bond
+
+- ticker: GSEC10IETF.NS
+  name: ICICI Prudential Nifty 10 yr Benchmark G-Sec ETF
+  sector: G-Sec
+
+- ticker: LIQUIDBEES.NS
+  name: Nippon India ETF Nifty 1D Rate Liquid BeES
+  sector: Liquid
+
+- ticker: MASPTOP50.NS
+  name: Mirae Asset S&P 500 Top 50 ETF
+  sector: S&P 500
+
+- ticker: HNGSNGBEES.NS
+  name: Nippon India ETF Hang Seng BeES
+  sector: China / Hong Kong

@@ -6,6 +6,10 @@
 # config/social_trending_etfs.yaml exactly — the dashboard uses it to filter the
 # returns tables when this leaf is clicked. Leave it blank/omitted for
 # sectors/themes not yet in the tracker.
+#
+# As of 2026-08-08 every leaf is covered by a verified NSE ETF except four
+# (marked below) where no direct NSE-listed ETF product could be found —
+# these stay untracked/gray on the chart rather than forcing a bad-fit match.
 
 - level1: Equity
   level2: Broad Market
@@ -22,9 +26,11 @@
 - level1: Equity
   level2: Broad Market
   leaf: Smallcap 250
+  tracked_sector: Smallcap
 - level1: Equity
   level2: Broad Market
   leaf: Nifty 500 / Total Market
+  tracked_sector: Total Market (BSE 500)  # proxy: no direct Nifty 500 ETF found, BSE 500 is the closest broad total-market ETF
 
 - level1: Equity
   level2: Sectoral
@@ -49,15 +55,19 @@
 - level1: Equity
   level2: Sectoral
   leaf: FMCG
+  tracked_sector: FMCG
 - level1: Equity
   level2: Sectoral
   leaf: Auto
+  tracked_sector: Auto
 - level1: Equity
   level2: Sectoral
   leaf: Energy
+  tracked_sector: Energy
 - level1: Equity
   level2: Sectoral
   leaf: Metal
+  tracked_sector: Metal
 - level1: Equity
   level2: Sectoral
   leaf: Realty
@@ -65,9 +75,11 @@
 - level1: Equity
   level2: Sectoral
   leaf: Media
+  # No NSE-listed Nifty Media ETF found (index exists, no ETF product as of 2026-08)
 - level1: Equity
   level2: Sectoral
   leaf: Financial Services (Ex-Bank)
+  tracked_sector: Financial Services (Ex-Bank)
 - level1: Equity
   level2: Sectoral
   leaf: Infrastructure
@@ -84,51 +96,66 @@
 - level1: Equity
   level2: Thematic
   leaf: Digital
+  tracked_sector: Digital (Global Tech)  # proxy: Mirae Asset NYSE FANG+ ETF (global, not India-specific digital theme)
 - level1: Equity
   level2: Thematic
   leaf: EV & New Age Auto
+  tracked_sector: EV & New Age Auto
 - level1: Equity
   level2: Thematic
   leaf: Defence
+  tracked_sector: Defence
 - level1: Equity
   level2: Thematic
   leaf: Manufacturing
+  # No NSE-listed India Manufacturing ETF found as of 2026-08
 
 - level1: Equity
   level2: Strategy / Factor
   leaf: Quality
+  tracked_sector: Quality Factor
 - level1: Equity
   level2: Strategy / Factor
   leaf: Value
+  tracked_sector: Value Factor
 - level1: Equity
   level2: Strategy / Factor
   leaf: Momentum
+  tracked_sector: Momentum Factor
 - level1: Equity
   level2: Strategy / Factor
   leaf: Dividend Opportunities
+  tracked_sector: Dividend Opportunities
 - level1: Equity
   level2: Strategy / Factor
   leaf: Low Volatility
+  tracked_sector: Low Volatility Factor
 - level1: Equity
   level2: Strategy / Factor
   leaf: Alpha
+  tracked_sector: Alpha Factor
 
 - level1: Equity
   level2: ESG
   leaf: ESG
+  tracked_sector: ESG
 
 - level1: Debt
   level2: Target Maturity
   leaf: Bharat Bond
+  tracked_sector: Target Maturity Bond
 - level1: Debt
   level2: Gilt / G-Sec
   leaf: G-Sec
+  tracked_sector: G-Sec
 - level1: Debt
   level2: Liquid / Overnight
   leaf: Liquid
+  tracked_sector: Liquid
 - level1: Debt
   level2: Corporate Bond
   leaf: Corporate Bond
+  # No standalone NSE-listed corporate bond ETF found separate from Bharat Bond as of 2026-08
 
 - level1: Commodity
   level2: Precious Metals
@@ -146,10 +173,13 @@
 - level1: International
   level2: US Equity
   leaf: S&P 500
+  tracked_sector: S&P 500
 - level1: International
   level2: Other Geographies
   leaf: Global / China / Other
+  tracked_sector: China / Hong Kong
 
 - level1: Hybrid
   level2: Multi-Asset Allocation
   leaf: Multi-Asset Allocation
+  # No NSE-listed multi-asset allocation ETF found as of 2026-08 (only FoF/mutual fund products exist)
