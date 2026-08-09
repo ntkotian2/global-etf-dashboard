@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "etf-tracker": {
+      "command": "python",
+      "args": ["C:\\Users\\ntkot\\Documents\\GitHub\\global-etf-database\\mcp-server\\server.py"],
+      "env": {
+        "ETF_API_BASE_URL": "https://global-etf-database-api.onrender.com"
+      }
+    }
+  }
+}
