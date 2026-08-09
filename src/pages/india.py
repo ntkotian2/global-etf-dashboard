@@ -1,10 +1,7 @@
-"""Streamlit dashboard for comparing India sector ETF performance.
+"""India sector ETF tracker page: taxonomy chart, sector performance,
+returns comparison, and social-media-trending ETFs."""
 
-Usage:
-    streamlit run src/dashboard.py
-"""
-
-from datetime import date, timedelta
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -12,14 +9,18 @@ import plotly.graph_objects as go
 import streamlit as st
 import yaml
 
-from db import get_connection
-
-st.set_page_config(page_title="India Sector ETF Tracker", layout="wide")
-
-SOCIAL_TRENDING_CONFIG = (
-    Path(__file__).resolve().parent.parent / "config" / "social_trending_etfs.yaml"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from common import (
+    COMPARISON_PERIODS,
+    load_data,
+    period_return,
+    render_returns_comparison_table,
+    render_sector_performance_chart,
 )
-TAXONOMY_CONFIG = Path(__file__).resolve().parent.parent / "config" / "etf_taxonomy.yaml"
+
+CONFIG_DIR = Path(__file__).resolve().parent.parent.parent / "config"
+SOCIAL_TRENDING_CONFIG = CONFIG_DIR / "social_trending_etfs.yaml"
+TAXONOMY_CONFIG = CONFIG_DIR / "etf_taxonomy.yaml"
 
 # Sunburst ring colors: neutral for asset-class/category rings; the leaf ring
 # is a traffic light on 1-year return (green/orange/red), gray where no
@@ -33,49 +34,10 @@ TAXONOMY_NO_DATA_COLOR = "#c3c2b7"
 TAXONOMY_GREEN_THRESHOLD = 10.0
 TAXONOMY_RED_THRESHOLD = -10.0
 
-PERIODS = {
-    "1W": 7,
-    "1M": 30,
-    "3M": 90,
-    "6M": 182,
-    "1Y": 365,
-    "3Y": 365 * 3,
-}
-
-
-@st.cache_data(ttl=3600)
-def load_data() -> pd.DataFrame:
-    conn = get_connection()
-    df = pd.read_sql_query(
-        """
-        SELECT p.ticker, e.name, e.sector, p.date, p.close
-        FROM prices p JOIN etfs e ON e.ticker = p.ticker
-        ORDER BY p.date
-        """,
-        conn,
-        parse_dates=["date"],
-    )
-    conn.close()
-    return df
-
 
 def load_taxonomy() -> list[dict]:
     with open(TAXONOMY_CONFIG, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
-
-
-def period_return(series: pd.Series, days: int) -> float | None:
-    series = series.dropna()
-    if series.empty:
-        return None
-    cutoff_date = pd.Timestamp(date.today() - timedelta(days=days))
-    eligible = series[series.index >= cutoff_date]
-    if eligible.empty:
-        return None
-    start_price = eligible.iloc[0]
-    if start_price == 0:
-        return None
-    return (series.iloc[-1] / start_price - 1) * 100
 
 
 def sector_1y_returns(df: pd.DataFrame) -> dict[str, float]:
@@ -177,7 +139,7 @@ def taxonomy_sector_lookup(
 
 st.title("India Sector ETF Tracker")
 
-df = load_data()
+df = load_data("India")
 
 if df.empty:
     st.warning("No data yet. Run `python src/fetch.py` first to populate the database.")
@@ -196,14 +158,13 @@ st.caption(
 taxonomy = load_taxonomy()
 taxonomy_fig = build_taxonomy_sunburst(taxonomy, sector_1y_returns(df))
 taxonomy_event = st.plotly_chart(
-    taxonomy_fig, width='stretch', on_select="rerun", key="taxonomy_chart"
+    taxonomy_fig, width="stretch", on_select="rerun", key="taxonomy_chart"
 )
 
 leaf_sectors, l2_sectors, l1_sectors = taxonomy_sector_lookup(taxonomy)
 clicked_points = taxonomy_event["selection"]["points"] if taxonomy_event else []
 if clicked_points:
     point = clicked_points[0]
-    print(f"[taxonomy_chart] click point keys: {point}")  # temporary debug, logs/dashboard.log
     clicked_label = point.get("label", "")
     # Sunburst point selections don't carry `customdata` through Streamlit's
     # event mapping (unlike scatter/bar) -- `id` is the native Plotly field
@@ -223,34 +184,8 @@ if clicked_points:
 
 selected_sectors = st.multiselect("Sectors", sectors, default=sectors, key="sector_filter")
 
-period_label = st.radio("Period", list(PERIODS.keys()), index=2, horizontal=True)
-cutoff = pd.Timestamp(date.today() - timedelta(days=PERIODS[period_label]))
-
-filtered = df[df["sector"].isin(selected_sectors) & (df["date"] >= cutoff)]
-
-st.subheader("Sector performance (normalized to 100 at period start)")
-pivot = filtered.pivot_table(index="date", columns="name", values="close")
-normalized = pivot / pivot.bfill().iloc[0] * 100
-st.line_chart(normalized)
-
-st.subheader("Returns comparison")
-COMPARISON_PERIODS = {"3M Return %": 90, "6M Return %": 182, "1Y Return %": 365}
-
-full_pivot = df[df["sector"].isin(selected_sectors)].pivot_table(
-    index="date", columns="name", values="close"
-)
-
-comparison = []
-for name, series in full_pivot.items():
-    sector = df.loc[df["name"] == name, "sector"].iloc[0]
-    row = {"ETF": name, "Sector": sector}
-    for label, days in COMPARISON_PERIODS.items():
-        ret = period_return(series, days)
-        row[label] = round(ret, 2) if ret is not None else None
-    comparison.append(row)
-
-comparison_df = pd.DataFrame(comparison).sort_values("1Y Return %", ascending=False)
-st.dataframe(comparison_df, width='stretch', hide_index=True)
+render_sector_performance_chart(df, selected_sectors, period_key="period_india")
+render_returns_comparison_table(df, selected_sectors)
 
 st.subheader("Top 10 trending on social media")
 st.caption(
@@ -278,6 +213,6 @@ for rank, etf in enumerate(trending_etfs, start=1):
     trending_rows.append(row)
 
 trending_df = pd.DataFrame(trending_rows)
-st.dataframe(trending_df, width='stretch', hide_index=True)
+st.dataframe(trending_df, width="stretch", hide_index=True)
 
 st.caption(f"Data through {df['date'].max().date()}")

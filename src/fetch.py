@@ -1,7 +1,7 @@
-"""Fetch India ETF prices via yfinance and upsert into SQLite.
+"""Fetch India/USA/Canada ETF prices via yfinance and upsert into SQLite.
 
-Pulls the combined ticker list from config/etfs.yaml and
-config/social_trending_etfs.yaml.
+Pulls the combined ticker list from every file in CONFIG_FILES, tagging each
+with its market.
 
 Usage:
     python src/fetch.py                 # incremental update for all configured ETFs
@@ -18,23 +18,31 @@ import yfinance as yf
 from db import get_connection
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "config"
-CONFIG_FILES = ["etfs.yaml", "social_trending_etfs.yaml"]
+# filename -> market. India's two files share the "India" market.
+CONFIG_FILES = {
+    "etfs.yaml": "India",
+    "social_trending_etfs.yaml": "India",
+    "etfs_usa.yaml": "USA",
+    "etfs_canada.yaml": "Canada",
+}
 
 
 def load_etf_config() -> list[dict]:
     etfs: dict[str, dict] = {}
-    for filename in CONFIG_FILES:
+    for filename, market in CONFIG_FILES.items():
         with open(CONFIG_DIR / filename, "r", encoding="utf-8") as f:
             for etf in yaml.safe_load(f):
+                etf["market"] = market
                 etfs[etf["ticker"]] = etf  # de-dupe tickers shared across files
     return list(etfs.values())
 
 
 def upsert_etfs(conn, etfs: list[dict]) -> None:
     conn.executemany(
-        "INSERT INTO etfs (ticker, name, sector) VALUES (?, ?, ?) "
-        "ON CONFLICT(ticker) DO UPDATE SET name=excluded.name, sector=excluded.sector",
-        [(e["ticker"], e["name"], e["sector"]) for e in etfs],
+        "INSERT INTO etfs (ticker, name, sector, market) VALUES (?, ?, ?, ?) "
+        "ON CONFLICT(ticker) DO UPDATE SET name=excluded.name, sector=excluded.sector, "
+        "market=excluded.market",
+        [(e["ticker"], e["name"], e["sector"], e["market"]) for e in etfs],
     )
     conn.commit()
 

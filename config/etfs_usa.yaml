@@ -1,0 +1,54 @@
+# USA sector ETFs to track (SPDR Select Sector ETFs + broad market).
+# ticker must match the yfinance symbol (US tickers need no suffix).
+
+- ticker: SPY
+  name: SPDR S&P 500 ETF Trust
+  sector: Broad Market (S&P 500)
+
+- ticker: QQQ
+  name: Invesco QQQ Trust
+  sector: Broad Market (Nasdaq 100)
+
+- ticker: XLF
+  name: Financial Select Sector SPDR ETF
+  sector: Financials
+
+- ticker: XLK
+  name: Technology Select Sector SPDR ETF
+  sector: Technology
+
+- ticker: XLV
+  name: Health Care Select Sector SPDR ETF
+  sector: Health Care
+
+- ticker: XLE
+  name: Energy Select Sector SPDR ETF
+  sector: Energy
+
+- ticker: XLI
+  name: Industrial Select Sector SPDR ETF
+  sector: Industrials
+
+- ticker: XLY
+  name: Consumer Discretionary Select Sector SPDR ETF
+  sector: Consumer Discretionary
+
+- ticker: XLP
+  name: Consumer Staples Select Sector SPDR ETF
+  sector: Consumer Staples
+
+- ticker: XLU
+  name: Utilities Select Sector SPDR ETF
+  sector: Utilities
+
+- ticker: XLB
+  name: Materials Select Sector SPDR ETF
+  sector: Materials
+
+- ticker: XLRE
+  name: Real Estate Select Sector SPDR ETF
+  sector: Real Estate
+
+- ticker: XLC
+  name: Communication Services Select Sector SPDR ETF
+  sector: Communication Services

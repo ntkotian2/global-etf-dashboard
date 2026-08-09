@@ -1,8 +1,13 @@
-# India Sector ETF Tracker
+# Multi-Market ETF Tracker
 
-Tracks daily prices for India's NSE-listed sector ETFs (Bank, IT, Pharma, PSU Bank,
-Consumption, Infra, etc.), stores history in a local SQLite database, and provides a
-dashboard for comparing sector performance over time.
+Tracks daily sector ETF prices across **India** (NSE), **USA**, and **Canada**
+(TSX), stores history in a local SQLite database, and provides a multi-page
+dashboard for comparing sector performance within each market.
+
+- **India**: full-featured — top-down sector/theme classification chart,
+  sector performance, returns comparison, social-media-trending ETFs.
+- **USA / Canada**: sector performance + returns comparison (India's extra
+  sections haven't been built out for these yet).
 
 ## Setup
 
@@ -17,24 +22,26 @@ python src/fetch.py          # incremental update (only new dates since last fet
 python src/fetch.py --full   # re-download full history for every ETF
 ```
 
-This populates `data/etfs.db` (SQLite). Re-run periodically (e.g. daily after market
-close) to keep the database current.
+This populates `data/etfs.db` (SQLite) from every config file in
+`src/fetch.py`'s `CONFIG_FILES` map (India, USA, Canada). Re-run periodically
+(e.g. daily after market close) to keep the database current.
 
 ## View the dashboard
 
 ```
-streamlit run src/dashboard.py
+streamlit run src/app.py
 ```
 
-Lets you pick sectors and a time window, and shows normalized performance lines plus
-a sortable returns table.
+Opens on a Home page with links to India / USA / Canada. Each market page
+lets you pick sectors and a time window, and shows normalized performance
+lines plus a sortable returns table.
 
 ## Auto-start on login
 
-`scripts/startup_all.vbs` runs `fetch.py` then launches the dashboard, both hidden
-(no console windows). A copy is installed in your Windows Startup folder so this runs
-automatically every time you log in, and the dashboard stays reachable at
-`http://localhost:8501` — bookmark it.
+`scripts/startup_all.vbs` runs `fetch.py` then launches the dashboard, both
+hidden (no console windows). A copy is installed in your Windows Startup
+folder so this runs automatically every time you log in, and the dashboard
+stays reachable at `http://localhost:8501` — bookmark it.
 
 Logs go to `logs/fetch.log` and `logs/dashboard.log`.
 
@@ -51,10 +58,34 @@ Copy-Item scripts\startup_all.vbs "$([Environment]::GetFolderPath('Startup'))\In
 
 ## Adding/removing ETFs
 
-Edit [config/etfs.yaml](config/etfs.yaml) — add a ticker (must be a valid yfinance
-symbol, NSE tickers use the `.NS` suffix), name, and sector, then re-run `fetch.py`.
+Edit the relevant config file, then re-run `fetch.py`:
+- [config/etfs.yaml](config/etfs.yaml) — India sector ETFs
+- [config/etfs_usa.yaml](config/etfs_usa.yaml) — USA sector ETFs
+- [config/etfs_canada.yaml](config/etfs_canada.yaml) — Canada sector ETFs
+- [config/social_trending_etfs.yaml](config/social_trending_etfs.yaml) — India social-trending list
+- [config/etf_taxonomy.yaml](config/etf_taxonomy.yaml) — India's classification chart structure
+
+`ticker` must be a valid yfinance symbol: NSE tickers use `.NS`, TSX tickers
+use `.TO`, US tickers need no suffix.
+
+## Project structure
+
+```
+src/
+  app.py          # entry point (streamlit run src/app.py) — defines page navigation
+  common.py       # shared helpers used by every market page
+  db.py           # SQLite schema + connection
+  fetch.py        # pulls prices via yfinance, upserts into SQLite
+  pages/
+    home.py       # landing page with links to each market
+    india.py      # full-featured India page
+    usa.py        # USA page
+    canada.py     # Canada page
+```
 
 ## Data source
 
-Prices come from Yahoo Finance via the `yfinance` library. Data is typically delayed
-and best-effort — not suitable for trading decisions, only for tracking trends.
+Prices come from Yahoo Finance via the `yfinance` library — free, no
+subscription or account needed, but unofficial (not a licensed API) and
+delayed. Fine for a daily trend tracker like this one, not for trading
+decisions.

@@ -1,0 +1,42 @@
+# Canada sector ETFs to track (TSX-listed, mostly iShares/BMO).
+# ticker must match the yfinance symbol (TSX tickers use the ".TO" suffix).
+
+- ticker: XIU.TO
+  name: iShares S&P/TSX 60 Index ETF
+  sector: Broad Market (TSX 60)
+
+- ticker: XIC.TO
+  name: iShares Core S&P/TSX Capped Composite Index ETF
+  sector: Broad Market (TSX Composite)
+
+- ticker: ZEB.TO
+  name: BMO Equal Weight Banks Index ETF
+  sector: Banking
+
+- ticker: XFN.TO
+  name: iShares S&P/TSX Capped Financials Index ETF
+  sector: Financials
+
+- ticker: XEG.TO
+  name: iShares S&P/TSX Capped Energy Index ETF
+  sector: Energy
+
+- ticker: XMA.TO
+  name: iShares S&P/TSX Capped Materials Index ETF
+  sector: Materials
+
+- ticker: XRE.TO
+  name: iShares S&P/TSX Capped REIT Index ETF
+  sector: Real Estate
+
+- ticker: XIT.TO
+  name: iShares S&P/TSX Capped Information Technology Index ETF
+  sector: Technology
+
+- ticker: ZUT.TO
+  name: BMO Equal Weight Utilities Index ETF
+  sector: Utilities
+
+- ticker: XGD.TO
+  name: iShares S&P/TSX Global Gold Index ETF
+  sector: Gold Mining
