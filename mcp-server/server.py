@@ -7,9 +7,14 @@ doesn't work on Streamlit Community Cloud (see README.md's API section).
 Set ETF_API_BASE_URL to wherever you deployed api-server; defaults to
 localhost for local development.
 
-Run directly for local testing:
-    python server.py
-Normally launched by an MCP client (Claude Desktop, Claude Code) via stdio.
+Two ways to run this, controlled by MCP_TRANSPORT:
+- stdio (default): a local subprocess, for Claude Desktop / Claude Code.
+      python server.py
+- streamable-http: a standalone HTTPS server, for claude.ai's Custom
+  Connectors (which need a remote MCP server, not a local subprocess).
+      MCP_TRANSPORT=streamable-http PORT=8000 python server.py
+  See README.md's MCP server section for deployment (Render) and how to
+  add it as a Custom Connector.
 """
 
 import os
@@ -28,7 +33,9 @@ def _slug(market: str) -> str:
 
 
 def _fetch(path: str) -> dict:
-    resp = httpx.get(f"{BASE_URL}/{path}", timeout=15)
+    # Generous timeout: on a free-tier host, a cold start plus an uncached
+    # market's first fetch (fresh yfinance pull) can take well over a minute.
+    resp = httpx.get(f"{BASE_URL}/{path}", timeout=120)
     resp.raise_for_status()
     return resp.json()
 
@@ -86,4 +93,8 @@ def get_all_markets() -> dict:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    if os.environ.get("MCP_TRANSPORT") == "streamable-http":
+        port = int(os.environ.get("PORT", 8000))
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=port, stateless_http=True)
+    else:
+        mcp.run()

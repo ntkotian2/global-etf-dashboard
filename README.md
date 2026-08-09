@@ -117,7 +117,8 @@ api-server/       # standalone FastAPI service — the real public API, see API 
 mcp-server/       # MCP server wrapping api-server as Claude-usable tools, see MCP server below
   server.py
   requirements.txt
-render.yaml       # Render blueprint for deploying api-server
+.mcp.json         # project-scoped MCP config, auto-loaded by Claude Code
+render.yaml       # Render blueprint: api-server + the remote MCP server
 ```
 
 ## API
@@ -214,14 +215,29 @@ to the deployed URL above for the live data.
 ```
 Restart Claude Desktop after editing.
 
-**Claude Code**:
+**Claude Code**: this repo already has a project-scoped [.mcp.json](.mcp.json)
+pointing at the deployed API, so opening this project in Claude Code
+auto-prompts you to approve the `etf-tracker` server — nothing to configure.
+To add it manually elsewhere:
 ```
 claude mcp add etf-tracker --env ETF_API_BASE_URL=https://global-etf-database-api.onrender.com -- python "C:\Users\ntkot\Documents\GitHub\global-etf-database\mcp-server\server.py"
 ```
 
-**claude.ai (web/mobile Custom Connectors)** needs a *remote* MCP server
-(reachable over HTTPS), not this stdio-based one — a further step beyond
-what's built here if you want it on that surface too.
+**claude.ai (web/mobile) Custom Connectors** need a *remote* MCP server
+(HTTPS-reachable), not the stdio subprocess above — `server.py` supports
+both, switched by `MCP_TRANSPORT`:
+```
+MCP_TRANSPORT=streamable-http PORT=8000 python server.py
+```
+Deployed via the same [render.yaml](render.yaml) blueprint as the API, as
+`global-etf-database-mcp`, at
+`https://global-etf-database-mcp.onrender.com/mcp`. To connect it:
+
+1. On claude.ai, go to **Settings → Connectors → Add custom connector**.
+2. Paste `https://global-etf-database-mcp.onrender.com/mcp` as the URL, no
+   authentication needed (it's read-only public market data).
+3. Enable it in a chat via the tools/connectors picker — `list_markets`,
+   `get_etf`, `get_sector_rotation`, etc. become available as tools.
 
 ## Data source
 

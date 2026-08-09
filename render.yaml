@@ -7,3 +7,20 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /healthz
+
+  # Remote MCP server (streamable-http transport) for claude.ai's Custom
+  # Connectors, which need an HTTPS-reachable server, not a local stdio
+  # subprocess. Talks to global-etf-database-api above, same as the local
+  # stdio version used by Claude Desktop/Code.
+  - type: web
+    name: global-etf-database-mcp
+    runtime: python
+    rootDir: mcp-server
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: MCP_TRANSPORT
+        value: streamable-http
+      - key: ETF_API_BASE_URL
+        value: https://global-etf-database-api.onrender.com
