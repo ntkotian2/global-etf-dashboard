@@ -15,8 +15,8 @@ social-media-trending ETFs.
 
 **Live dashboard**: https://global-etf-database.streamlit.app/
 
-**JSON API** (open, no key needed): a separate small service, not yet deployed publicly
-— see [API](#api) below for why, and for deploy instructions.
+**JSON API** (open, no key needed): https://global-etf-database-api.onrender.com/
+— see [API](#api) below for the endpoints and why it's a separate service.
 
 **MCP server**: lets Claude query this data directly — see [MCP server](#mcp-server) below.
 
@@ -148,16 +148,19 @@ pattern as the dashboard, via yfinance).
 
 ### Endpoints
 
-Once deployed (see below), replace `<api-url>` with wherever you hosted it:
+Live at https://global-etf-database-api.onrender.com (deployed on Render's
+free tier — the first request after a period of inactivity takes ~30-60s to
+wake the service and cold-fetch that market's price history; cached
+responses after that are near-instant):
 
 ```
-GET <api-url>/            # discovery doc: schema + endpoint list
-GET <api-url>/india       # one market
-GET <api-url>/usa
-GET <api-url>/usa-ai
-GET <api-url>/canada
-GET <api-url>/all         # every market combined
-GET <api-url>/healthz     # health check
+GET https://global-etf-database-api.onrender.com/            # discovery doc: schema + endpoint list
+GET https://global-etf-database-api.onrender.com/india        # one market
+GET https://global-etf-database-api.onrender.com/usa
+GET https://global-etf-database-api.onrender.com/usa-ai
+GET https://global-etf-database-api.onrender.com/canada
+GET https://global-etf-database-api.onrender.com/all          # every market combined
+GET https://global-etf-database-api.onrender.com/healthz      # health check
 ```
 
 ### Deploying api-server
@@ -193,8 +196,8 @@ cd mcp-server
 pip install -r requirements.txt
 ```
 
-Set `ETF_API_BASE_URL` to your deployed api-server URL (defaults to
-`http://localhost:8000` for local dev).
+`ETF_API_BASE_URL` defaults to `http://localhost:8000` for local dev; set it
+to the deployed URL above for the live data.
 
 **Claude Desktop** — add to `claude_desktop_config.json`
 (`%APPDATA%\Claude\claude_desktop_config.json` on Windows):
@@ -204,7 +207,7 @@ Set `ETF_API_BASE_URL` to your deployed api-server URL (defaults to
     "etf-tracker": {
       "command": "python",
       "args": ["C:\\Users\\ntkot\\Documents\\GitHub\\global-etf-database\\mcp-server\\server.py"],
-      "env": { "ETF_API_BASE_URL": "https://<your-render-url>" }
+      "env": { "ETF_API_BASE_URL": "https://global-etf-database-api.onrender.com" }
     }
   }
 }
@@ -213,7 +216,7 @@ Restart Claude Desktop after editing.
 
 **Claude Code**:
 ```
-claude mcp add etf-tracker --env ETF_API_BASE_URL=https://<your-render-url> -- python "C:\Users\ntkot\Documents\GitHub\global-etf-database\mcp-server\server.py"
+claude mcp add etf-tracker --env ETF_API_BASE_URL=https://global-etf-database-api.onrender.com -- python "C:\Users\ntkot\Documents\GitHub\global-etf-database\mcp-server\server.py"
 ```
 
 **claude.ai (web/mobile Custom Connectors)** needs a *remote* MCP server
