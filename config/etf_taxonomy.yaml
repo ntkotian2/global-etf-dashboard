@@ -1,0 +1,155 @@
+# Top-down classification of the full NSE India ETF universe: Asset Class ->
+# Category -> Sector/Theme. Based on NSE Indices' published index categories
+# (broad market, sectoral, thematic, strategy/factor, fixed income) as of 2026-08.
+#
+# `tracked_sector`, when set, must match a `sector` value in config/etfs.yaml or
+# config/social_trending_etfs.yaml exactly — the dashboard uses it to filter the
+# returns tables when this leaf is clicked. Leave it blank/omitted for
+# sectors/themes not yet in the tracker.
+
+- level1: Equity
+  level2: Broad Market
+  leaf: Nifty 50
+  tracked_sector: Broad Market
+- level1: Equity
+  level2: Broad Market
+  leaf: Nifty Next 50
+  tracked_sector: Broad Market (Next 50)
+- level1: Equity
+  level2: Broad Market
+  leaf: Midcap 150
+  tracked_sector: Midcap
+- level1: Equity
+  level2: Broad Market
+  leaf: Smallcap 250
+- level1: Equity
+  level2: Broad Market
+  leaf: Nifty 500 / Total Market
+
+- level1: Equity
+  level2: Sectoral
+  leaf: Banking
+  tracked_sector: Banking
+- level1: Equity
+  level2: Sectoral
+  leaf: Private Banking
+  tracked_sector: Private Banking
+- level1: Equity
+  level2: Sectoral
+  leaf: PSU Banking
+  tracked_sector: PSU Banking
+- level1: Equity
+  level2: Sectoral
+  leaf: IT
+  tracked_sector: IT
+- level1: Equity
+  level2: Sectoral
+  leaf: Pharma / Healthcare
+  tracked_sector: Pharma
+- level1: Equity
+  level2: Sectoral
+  leaf: FMCG
+- level1: Equity
+  level2: Sectoral
+  leaf: Auto
+- level1: Equity
+  level2: Sectoral
+  leaf: Energy
+- level1: Equity
+  level2: Sectoral
+  leaf: Metal
+- level1: Equity
+  level2: Sectoral
+  leaf: Realty
+  tracked_sector: Realty
+- level1: Equity
+  level2: Sectoral
+  leaf: Media
+- level1: Equity
+  level2: Sectoral
+  leaf: Financial Services (Ex-Bank)
+- level1: Equity
+  level2: Sectoral
+  leaf: Infrastructure
+  tracked_sector: Infrastructure
+- level1: Equity
+  level2: Sectoral
+  leaf: Consumption
+  tracked_sector: Consumption
+- level1: Equity
+  level2: Sectoral
+  leaf: PSU / CPSE
+  tracked_sector: PSU / Energy
+
+- level1: Equity
+  level2: Thematic
+  leaf: Digital
+- level1: Equity
+  level2: Thematic
+  leaf: EV & New Age Auto
+- level1: Equity
+  level2: Thematic
+  leaf: Defence
+- level1: Equity
+  level2: Thematic
+  leaf: Manufacturing
+
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Quality
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Value
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Momentum
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Dividend Opportunities
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Low Volatility
+- level1: Equity
+  level2: Strategy / Factor
+  leaf: Alpha
+
+- level1: Equity
+  level2: ESG
+  leaf: ESG
+
+- level1: Debt
+  level2: Target Maturity
+  leaf: Bharat Bond
+- level1: Debt
+  level2: Gilt / G-Sec
+  leaf: G-Sec
+- level1: Debt
+  level2: Liquid / Overnight
+  leaf: Liquid
+- level1: Debt
+  level2: Corporate Bond
+  leaf: Corporate Bond
+
+- level1: Commodity
+  level2: Precious Metals
+  leaf: Gold
+  tracked_sector: Gold
+- level1: Commodity
+  level2: Precious Metals
+  leaf: Silver
+  tracked_sector: Silver
+
+- level1: International
+  level2: US Equity
+  leaf: Nasdaq 100
+  tracked_sector: US Tech (Nasdaq 100)
+- level1: International
+  level2: US Equity
+  leaf: S&P 500
+- level1: International
+  level2: Other Geographies
+  leaf: Global / China / Other
+
+- level1: Hybrid
+  level2: Multi-Asset Allocation
+  leaf: Multi-Asset Allocation
