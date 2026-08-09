@@ -21,12 +21,17 @@ SOCIAL_TRENDING_CONFIG = (
 )
 TAXONOMY_CONFIG = Path(__file__).resolve().parent.parent / "config" / "etf_taxonomy.yaml"
 
-# Sunburst ring colors: neutral for asset-class/category rings, status colors
-# (green/gray) on the leaf ring to flag what's actionable in this tracker.
+# Sunburst ring colors: neutral for asset-class/category rings; the leaf ring
+# is a traffic light on 1-year return (green/orange/red), gray where no
+# return data exists for that sector yet.
 TAXONOMY_L1_COLOR = "#f0efec"
 TAXONOMY_L2_COLOR = "#dedcd3"
-TAXONOMY_TRACKED_COLOR = "#0ca30c"
-TAXONOMY_UNTRACKED_COLOR = "#a9a79c"
+TAXONOMY_GREEN = "#0ca30c"
+TAXONOMY_ORANGE = "#fab219"
+TAXONOMY_RED = "#d03b3b"
+TAXONOMY_NO_DATA_COLOR = "#c3c2b7"
+TAXONOMY_GREEN_THRESHOLD = 10.0
+TAXONOMY_RED_THRESHOLD = -10.0
 
 PERIODS = {
     "1W": 7,
@@ -59,10 +64,38 @@ def load_taxonomy() -> list[dict]:
         return yaml.safe_load(f)
 
 
-def build_taxonomy_sunburst(taxonomy: list[dict], tracked_sectors: set[str]) -> go.Figure:
-    """Asset Class -> Category -> Sector/Theme sunburst. Node ids are
-    '/'-joined paths (e.g. 'Equity/Sectoral/Banking'), carried in customdata
-    so clicks can be resolved unambiguously even where labels repeat."""
+def period_return(series: pd.Series, days: int) -> float | None:
+    series = series.dropna()
+    if series.empty:
+        return None
+    cutoff_date = pd.Timestamp(date.today() - timedelta(days=days))
+    eligible = series[series.index >= cutoff_date]
+    if eligible.empty:
+        return None
+    start_price = eligible.iloc[0]
+    if start_price == 0:
+        return None
+    return (series.iloc[-1] / start_price - 1) * 100
+
+
+def sector_1y_returns(df: pd.DataFrame) -> dict[str, float]:
+    """Average 1-year return per sector, across every tracked ETF in it
+    (unfiltered by the sector multiselect -- the sunburst always reflects
+    true current performance)."""
+    pivot = df.pivot_table(index="date", columns="name", values="close")
+    name_to_sector = df.drop_duplicates("name").set_index("name")["sector"].to_dict()
+    by_sector: dict[str, list[float]] = {}
+    for name, series in pivot.items():
+        ret = period_return(series, 365)
+        if ret is not None:
+            by_sector.setdefault(name_to_sector[name], []).append(ret)
+    return {sector: sum(vals) / len(vals) for sector, vals in by_sector.items()}
+
+
+def build_taxonomy_sunburst(taxonomy: list[dict], sector_returns: dict[str, float]) -> go.Figure:
+    """Asset Class -> Category -> Sector/Theme sunburst, colored as a traffic
+    light on 1-year return. Node ids are '/'-joined paths (e.g.
+    'Equity/Sectoral/Banking')."""
     ids, labels, parents, values, colors, status = [], [], [], [], [], []
     seen = set()
 
@@ -88,13 +121,22 @@ def build_taxonomy_sunburst(taxonomy: list[dict], tracked_sectors: set[str]) -> 
             status.append("")
 
         tracked_sector = row.get("tracked_sector")
-        is_tracked = bool(tracked_sector) and tracked_sector in tracked_sectors
+        ret = sector_returns.get(tracked_sector) if tracked_sector else None
+        if ret is None:
+            color, status_text = TAXONOMY_NO_DATA_COLOR, "No return data yet"
+        elif ret > TAXONOMY_GREEN_THRESHOLD:
+            color, status_text = TAXONOMY_GREEN, f"Outperforming: {ret:+.1f}% (1Y)"
+        elif ret < TAXONOMY_RED_THRESHOLD:
+            color, status_text = TAXONOMY_RED, f"Underperforming: {ret:+.1f}% (1Y)"
+        else:
+            color, status_text = TAXONOMY_ORANGE, f"Sideways: {ret:+.1f}% (1Y)"
+
         ids.append(leaf_id)
         labels.append(leaf)
         parents.append(l2_id)
         values.append(1)
-        colors.append(TAXONOMY_TRACKED_COLOR if is_tracked else TAXONOMY_UNTRACKED_COLOR)
-        status.append("Tracked — click to filter tables below" if is_tracked else "Not tracked yet")
+        colors.append(color)
+        status.append(status_text)
 
     fig = go.Figure(
         go.Sunburst(
@@ -145,13 +187,14 @@ sectors = sorted(df["sector"].unique())
 
 st.subheader("NSE India ETF universe — top-down classification")
 st.caption(
-    "🟢 Tracked in this dashboard (click to filter the tables below) · "
-    "⚪ Not tracked yet. Click any ring — asset class, category, or "
-    "sector — to drill down."
+    f"🟢 1Y return > {TAXONOMY_GREEN_THRESHOLD:.0f}% · 🟠 "
+    f"{TAXONOMY_RED_THRESHOLD:.0f}% to {TAXONOMY_GREEN_THRESHOLD:.0f}% · 🔴 1Y return < "
+    f"{TAXONOMY_RED_THRESHOLD:.0f}% · ⚪ no return data yet. Click any ring — "
+    "asset class, category, or sector — to filter the tables below."
 )
 
 taxonomy = load_taxonomy()
-taxonomy_fig = build_taxonomy_sunburst(taxonomy, set(sectors))
+taxonomy_fig = build_taxonomy_sunburst(taxonomy, sector_1y_returns(df))
 taxonomy_event = st.plotly_chart(
     taxonomy_fig, width='stretch', on_select="rerun", key="taxonomy_chart"
 )
@@ -159,7 +202,14 @@ taxonomy_event = st.plotly_chart(
 leaf_sectors, l2_sectors, l1_sectors = taxonomy_sector_lookup(taxonomy)
 clicked_points = taxonomy_event["selection"]["points"] if taxonomy_event else []
 if clicked_points:
-    clicked_id, clicked_label = clicked_points[0]["customdata"][0], clicked_points[0]["label"]
+    point = clicked_points[0]
+    print(f"[taxonomy_chart] click point keys: {point}")  # temporary debug, logs/dashboard.log
+    clicked_label = point.get("label", "")
+    # Sunburst point selections don't carry `customdata` through Streamlit's
+    # event mapping (unlike scatter/bar) -- `id` is the native Plotly field
+    # for id-based traces like this one, so use that; fall back to label for
+    # the handful of nodes whose label repeats across levels (e.g. "ESG").
+    clicked_id = point.get("id") or clicked_label
     if clicked_id != st.session_state.get("_last_taxonomy_click"):
         st.session_state["_last_taxonomy_click"] = clicked_id
         matched = leaf_sectors.get(clicked_id) or l2_sectors.get(clicked_id) or l1_sectors.get(clicked_id) or []
@@ -189,21 +239,6 @@ COMPARISON_PERIODS = {"3M Return %": 90, "6M Return %": 182, "1Y Return %": 365}
 full_pivot = df[df["sector"].isin(selected_sectors)].pivot_table(
     index="date", columns="name", values="close"
 )
-
-
-def period_return(series: pd.Series, days: int) -> float | None:
-    series = series.dropna()
-    if series.empty:
-        return None
-    cutoff_date = pd.Timestamp(date.today() - timedelta(days=days))
-    eligible = series[series.index >= cutoff_date]
-    if eligible.empty:
-        return None
-    start_price = eligible.iloc[0]
-    if start_price == 0:
-        return None
-    return (series.iloc[-1] / start_price - 1) * 100
-
 
 comparison = []
 for name, series in full_pivot.items():
