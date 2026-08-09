@@ -36,6 +36,17 @@ TAXONOMY_RED_THRESHOLD = -10.0
 
 @st.cache_data(ttl=3600)
 def load_data(market: str) -> pd.DataFrame:
+    """Self-refreshing: fetches this market's latest prices before reading,
+    so the app stays current without an external scheduler (e.g. on
+    Streamlit Community Cloud, which has no cron/Task Scheduler). Cheap on a
+    warm database (incremental fetch), self-heals with a full history pull
+    if the database is empty (ephemeral cloud storage can reset between
+    container restarts) -- that first load can take up to a minute."""
+    from fetch import fetch_market
+
+    with st.spinner(f"Fetching latest {market} prices…"):
+        fetch_market(market)
+
     conn = get_connection()
     df = pd.read_sql_query(
         """

@@ -29,12 +29,15 @@ CONFIG_FILES = {
 }
 
 
-def load_etf_config() -> list[dict]:
+def load_etf_config(market: str | None = None) -> list[dict]:
+    """All configured ETFs, or just one market's if `market` is given."""
     etfs: dict[str, dict] = {}
-    for filename, market in CONFIG_FILES.items():
+    for filename, file_market in CONFIG_FILES.items():
+        if market is not None and file_market != market:
+            continue
         with open(CONFIG_DIR / filename, "r", encoding="utf-8") as f:
             for etf in yaml.safe_load(f):
-                etf["market"] = market
+                etf["market"] = file_market
                 etfs[etf["ticker"]] = etf  # de-dupe tickers shared across files
     return list(etfs.values())
 
@@ -88,6 +91,23 @@ def upsert_prices(conn, rows: "list[tuple]") -> None:
         rows,
     )
     conn.commit()
+
+
+def fetch_market(market: str, full: bool = False) -> None:
+    """Incrementally fetch just one market's tickers. Called by the dashboard
+    itself (common.py) on each cache miss, so data self-refreshes on
+    platforms with no external scheduler (e.g. Streamlit Community Cloud) --
+    and self-heals with a full history pull if the database is empty/fresh
+    (ephemeral cloud storage can reset between container restarts)."""
+    etfs = load_etf_config(market)
+    conn = get_connection()
+    upsert_etfs(conn, etfs)
+    for etf in etfs:
+        ticker = etf["ticker"]
+        start = None if full else last_date_for(conn, ticker)
+        rows = fetch_ticker(ticker, start)
+        upsert_prices(conn, rows)
+    conn.close()
 
 
 def main() -> None:
