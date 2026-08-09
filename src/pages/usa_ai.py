@@ -19,7 +19,7 @@ CONFIG_DIR = Path(__file__).resolve().parent.parent.parent / "config"
 
 st.title("USA AI & Robotics ETF Tracker")
 
-df = load_data("USA-AI")
+df = load_data("USA-AI", CONFIG_DIR / "social_trending_etfs_usa_ai.yaml")
 
 if df.empty:
     st.warning("No data yet. Run `python src/fetch.py` first to populate the database.")

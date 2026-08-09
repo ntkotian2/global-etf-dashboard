@@ -1,6 +1,7 @@
 """Shared helpers used by every market page (India, USA, Canada)."""
 
-from datetime import date, timedelta
+import json
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -9,6 +10,11 @@ import streamlit as st
 import yaml
 
 from db import get_connection
+
+# Streamlit serves ./static/ (relative to the running app file, src/app.py)
+# at the public path /app/static/ -- see .streamlit/config.toml
+# (enableStaticServing) and README.md's API section.
+STATIC_API_DIR = Path(__file__).resolve().parent / "static" / "api"
 
 PERIODS = {
     "1W": 7,
@@ -35,13 +41,17 @@ TAXONOMY_RED_THRESHOLD = -10.0
 
 
 @st.cache_data(ttl=3600)
-def load_data(market: str) -> pd.DataFrame:
+def load_data(market: str, trending_config_path: Path | None = None) -> pd.DataFrame:
     """Self-refreshing: fetches this market's latest prices before reading,
     so the app stays current without an external scheduler (e.g. on
     Streamlit Community Cloud, which has no cron/Task Scheduler). Cheap on a
     warm database (incremental fetch), self-heals with a full history pull
     if the database is empty (ephemeral cloud storage can reset between
-    container restarts) -- that first load can take up to a minute."""
+    container restarts) -- that first load can take up to a minute.
+
+    Also re-exports this market's JSON API snapshot (see export_market_api)
+    on the same cache cycle, so /app/static/api/ stays in sync with what the
+    dashboard shows without a separate write path."""
     from fetch import fetch_market
 
     with st.spinner(f"Fetching latest {market} prices…"):
@@ -60,6 +70,10 @@ def load_data(market: str) -> pd.DataFrame:
         parse_dates=["date"],
     )
     conn.close()
+
+    if trending_config_path is not None:
+        export_market_api(market, df, trending_config_path)
+
     return df
 
 
@@ -349,3 +363,138 @@ def render_trending_table(trending_config_path: Path, df: pd.DataFrame) -> None:
         rows.append(row)
 
     st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+
+
+# --- JSON API export (read-only snapshot for external/AI consumers) ---
+
+
+def market_slug(market: str) -> str:
+    return market.lower().replace(" ", "-")
+
+
+def build_market_api_payload(
+    market: str, df: pd.DataFrame, trending_config_path: Path
+) -> dict:
+    """Everything the dashboard shows for one market, as JSON-safe plain
+    data: latest prices/returns per ETF, per-sector average returns, the
+    sector rotation signal, and the curated trending list."""
+    latest = df.sort_values("date").groupby("ticker").tail(1).set_index("ticker")
+    name_to_ticker = df.drop_duplicates("name").set_index("name")["ticker"].to_dict()
+    pivot = df.pivot_table(index="date", columns="name", values="close")
+
+    etfs = []
+    for ticker, row in latest.iterrows():
+        series = pivot[row["name"]] if row["name"] in pivot else pd.Series(dtype=float)
+        etfs.append(
+            {
+                "ticker": ticker,
+                "broker_ticker": broker_ticker(ticker),
+                "name": row["name"],
+                "sector": row["sector"],
+                "latest_price": round(float(row["close"]), 4),
+                "latest_date": row["date"].strftime("%Y-%m-%d"),
+                "return_3m_pct": _round_or_none(period_return(series, 90)),
+                "return_6m_pct": _round_or_none(period_return(series, 182)),
+                "return_1y_pct": _round_or_none(period_return(series, 365)),
+            }
+        )
+    etfs.sort(key=lambda e: e["ticker"])
+
+    sectors = []
+    mom_1m, mom_3m, mom_1y = (
+        sector_momentum(df, 30),
+        sector_momentum(df, 90),
+        sector_momentum(df, 365),
+    )
+    for sector in sorted(df["sector"].unique()):
+        sectors.append(
+            {
+                "sector": sector,
+                "avg_return_1m_pct": _round_or_none(mom_1m.get(sector)),
+                "avg_return_3m_pct": _round_or_none(mom_3m.get(sector)),
+                "avg_return_1y_pct": _round_or_none(mom_1y.get(sector)),
+            }
+        )
+
+    sector_rotation = []
+    shift = {s: mom_1m[s] - mom_3m[s] for s in mom_1m if s in mom_3m}
+    n_pairs = min(5, len(shift) // 2)
+    if n_pairs >= 1:
+        sector_to_ticker = df.drop_duplicates("sector").set_index("sector")["ticker"].to_dict()
+        ranked = sorted(shift.items(), key=lambda kv: kv[1])
+        losers, gainers = ranked[:n_pairs], list(reversed(ranked[-n_pairs:]))
+        for i in range(n_pairs):
+            from_sector, from_shift = losers[i]
+            to_sector, to_shift = gainers[i]
+            sector_rotation.append(
+                {
+                    "rank": i + 1,
+                    "from_sector": from_sector,
+                    "from_ticker": broker_ticker(sector_to_ticker[from_sector]),
+                    "from_1m_3m_shift_pct": round(from_shift, 2),
+                    "to_sector": to_sector,
+                    "to_ticker": broker_ticker(sector_to_ticker[to_sector]),
+                    "to_1m_3m_shift_pct": round(to_shift, 2),
+                }
+            )
+
+    with open(trending_config_path, "r", encoding="utf-8") as f:
+        trending_etfs = yaml.safe_load(f)
+    trending = []
+    for rank, etf in enumerate(trending_etfs, start=1):
+        series = pivot.get(etf["name"], pd.Series(dtype=float))
+        trending.append(
+            {
+                "rank": rank,
+                "ticker": etf["ticker"],
+                "broker_ticker": broker_ticker(etf["ticker"]),
+                "name": etf["name"],
+                "sector": etf["sector"],
+                "return_3m_pct": _round_or_none(period_return(series, 90)),
+                "return_6m_pct": _round_or_none(period_return(series, 182)),
+                "return_1y_pct": _round_or_none(period_return(series, 365)),
+                "note": etf["note"],
+            }
+        )
+
+    return {
+        "market": market,
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "data_through": df["date"].max().strftime("%Y-%m-%d"),
+        "etfs": etfs,
+        "sectors": sectors,
+        "sector_rotation": sector_rotation,
+        "trending": trending,
+    }
+
+
+def _round_or_none(value: float | None) -> float | None:
+    return round(value, 2) if value is not None else None
+
+
+def export_market_api(market: str, df: pd.DataFrame, trending_config_path: Path) -> None:
+    """Writes /app/static/api/{market-slug}.json and folds this market's
+    slice into the combined /app/static/api/all.json. Best-effort: on
+    Streamlit Community Cloud, runtime-written files aren't guaranteed to
+    persist across container restarts, but this re-runs on every cache
+    refresh (see load_data), so it self-heals the first time each market
+    page is visited after a restart -- same pattern as the SQLite database."""
+    STATIC_API_DIR.mkdir(parents=True, exist_ok=True)
+    payload = build_market_api_payload(market, df, trending_config_path)
+
+    slug = market_slug(market)
+    with open(STATIC_API_DIR / f"{slug}.json", "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+
+    all_path = STATIC_API_DIR / "all.json"
+    combined = {"markets": {}}
+    if all_path.exists():
+        try:
+            with open(all_path, "r", encoding="utf-8") as f:
+                combined = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            combined = {"markets": {}}
+    combined.setdefault("markets", {})[market] = payload
+    combined["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    with open(all_path, "w", encoding="utf-8") as f:
+        json.dump(combined, f, indent=2)

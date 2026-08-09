@@ -4,3 +4,8 @@ __pycache__/
 venv/
 data/*.db
 logs/*.log
+
+# Runtime-generated API snapshots (see common.py's export_market_api) --
+# regenerated automatically, index.json is hand-authored docs and stays.
+src/static/api/*.json
+!src/static/api/index.json

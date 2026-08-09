@@ -15,6 +15,9 @@ social-media-trending ETFs.
 
 **Live dashboard**: https://global-etf-database.streamlit.app/
 
+**JSON API** (open, no key needed): https://global-etf-database.streamlit.app/app/static/api/index.json
+— see [API](#api) below.
+
 ## Setup
 
 ```
@@ -102,7 +105,45 @@ src/
     usa.py        # USA page
     usa_ai.py     # USA AI/robotics thematic page
     canada.py     # Canada page
+  static/api/     # generated JSON snapshots served at /app/static/api/ — see API below
+.streamlit/
+  config.toml     # enableStaticServing = true, required for the API
 ```
+
+## API
+
+A read-only, unauthenticated JSON snapshot of everything the dashboard shows
+is served as static files, so any script or AI agent can pull the data with
+a plain HTTP GET — no key, no rate limit, no auth:
+
+```
+GET https://global-etf-database.streamlit.app/app/static/api/index.json    # discovery doc: schema + endpoint list
+GET https://global-etf-database.streamlit.app/app/static/api/india.json    # one market
+GET https://global-etf-database.streamlit.app/app/static/api/usa.json
+GET https://global-etf-database.streamlit.app/app/static/api/usa-ai.json
+GET https://global-etf-database.streamlit.app/app/static/api/canada.json
+GET https://global-etf-database.streamlit.app/app/static/api/all.json      # every market combined
+```
+
+Each market file has `etfs` (latest price + 3M/6M/1Y returns per ticker),
+`sectors` (average returns per sector), `sector_rotation` (the momentum-shift
+signal), and `trending` (the curated social-trending list) — the exact same
+numbers the dashboard renders, computed by
+[common.py](src/common.py)'s `build_market_api_payload`.
+
+How it works: Streamlit Community Cloud only runs the one dashboard process
+(no separate API server), so this uses Streamlit's built-in
+[static file serving](https://docs.streamlit.io/develop/concepts/configuration/serving-static-files)
+(`enableStaticServing` in [.streamlit/config.toml](.streamlit/config.toml)) —
+files under `src/static/` are served as-is at `/app/static/...`. Each
+market's JSON is (re)written by `load_data()` in `common.py` on the same
+1-hour self-refresh cycle as the dashboard's own data, so it self-heals the
+first time each market page is visited after a restart. These generated
+files aren't committed to git (see `.gitignore`) — only `index.json` is,
+since it's hand-written docs rather than a data snapshot. That also means a
+market's endpoint can briefly 404 right after a fresh deploy until someone
+(a browser visit, or your own script) loads that market's page at least
+once.
 
 ## Data source
 

@@ -19,7 +19,7 @@ CONFIG_DIR = Path(__file__).resolve().parent.parent.parent / "config"
 
 st.title("Canada Sector ETF Tracker")
 
-df = load_data("Canada")
+df = load_data("Canada", CONFIG_DIR / "social_trending_etfs_canada.yaml")
 
 if df.empty:
     st.warning("No data yet. Run `python src/fetch.py` first to populate the database.")

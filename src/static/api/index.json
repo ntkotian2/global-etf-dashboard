@@ -1,0 +1,66 @@
+{
+  "name": "Multi-Market ETF Tracker API",
+  "description": "Read-only, unauthenticated JSON snapshot of the data shown on https://global-etf-database.streamlit.app/ -- free to use, no API key required.",
+  "base_url": "https://global-etf-database.streamlit.app/app/static/api/",
+  "markets": ["India", "USA", "USA-AI", "Canada"],
+  "endpoints": {
+    "{market-slug}.json": "One market's full snapshot (etfs, sectors, sector_rotation, trending). market-slug is the market name lowercased with spaces replaced by hyphens, e.g. india.json, usa.json, usa-ai.json, canada.json.",
+    "all.json": "All markets combined, under a top-level \"markets\" object keyed by market name."
+  },
+  "payload_shape": {
+    "market": "string",
+    "generated_at": "ISO 8601 UTC timestamp of when this snapshot was built",
+    "data_through": "YYYY-MM-DD, the latest price date included",
+    "etfs": [
+      {
+        "ticker": "yfinance symbol, e.g. BOTZ or RELIANCE.NS",
+        "broker_ticker": "ticker with exchange suffix stripped, what you'd type into a broker",
+        "name": "fund name",
+        "sector": "sector/theme this ETF is tracked under",
+        "latest_price": "number, most recent close",
+        "latest_date": "YYYY-MM-DD",
+        "return_3m_pct": "number or null",
+        "return_6m_pct": "number or null",
+        "return_1y_pct": "number or null"
+      }
+    ],
+    "sectors": [
+      {
+        "sector": "string",
+        "avg_return_1m_pct": "number or null, averaged across every tracked ETF in the sector",
+        "avg_return_3m_pct": "number or null",
+        "avg_return_1y_pct": "number or null"
+      }
+    ],
+    "sector_rotation": [
+      {
+        "rank": "integer, 1 is the strongest signal",
+        "from_sector": "string, decelerating sector",
+        "from_ticker": "string",
+        "from_1m_3m_shift_pct": "number, how much the 1M return diverges below the 3M trend",
+        "to_sector": "string, accelerating sector",
+        "to_ticker": "string",
+        "to_1m_3m_shift_pct": "number, how much the 1M return diverges above the 3M trend"
+      }
+    ],
+    "trending": [
+      {
+        "rank": "integer",
+        "ticker": "string",
+        "broker_ticker": "string",
+        "name": "string",
+        "sector": "string",
+        "return_3m_pct": "number or null",
+        "return_6m_pct": "number or null",
+        "return_1y_pct": "number or null",
+        "note": "string, why this ETF is on the curated trending list"
+      }
+    ]
+  },
+  "caveats": [
+    "Prices come from Yahoo Finance via yfinance -- free and unofficial, delayed, not for trading decisions.",
+    "sector_rotation is a computed price-momentum proxy, not real fund-flow or social-media data.",
+    "trending is a manually curated, periodically-refreshed list, not a live social-media feed.",
+    "Snapshots regenerate whenever a human visits the corresponding dashboard page (self-refreshing, no external scheduler). A market's file may be missing or stale for up to an hour if its page hasn't been viewed recently, and can briefly 404 right after a container restart until first visited."
+  ]
+}
