@@ -102,6 +102,52 @@ def render_returns_comparison_table(df: pd.DataFrame, selected_sectors: list[str
     st.dataframe(comparison_df, width="stretch", hide_index=True)
 
 
+def render_sector_rotation_table(df: pd.DataFrame) -> None:
+    """Top 5 rows of the biggest momentum decelerators paired with the
+    biggest accelerators -- a computed price-momentum proxy for sector
+    rotation, NOT real institutional fund-flow or social-media data (no free
+    source for either exists)."""
+    st.subheader("Top 5 sector rotation (momentum proxy)")
+    st.caption(
+        "Computed signal, not real fund-flow or social-media data — ranks sectors by "
+        "how much their 1-month return diverges from their 3-month trend, then pairs "
+        "the biggest decelerators with the biggest accelerators to suggest where "
+        "capital may be rotating. Treat as a starting point for research, not a signal."
+    )
+
+    mom_1m = sector_momentum(df, 30)
+    mom_3m = sector_momentum(df, 90)
+    shift = {s: mom_1m[s] - mom_3m[s] for s in mom_1m if s in mom_3m}
+
+    n_pairs = min(5, len(shift) // 2)
+    if n_pairs < 1:
+        st.info("Not enough sectors with data yet to compute rotation.")
+        return
+
+    sector_to_ticker = df.drop_duplicates("sector").set_index("sector")["ticker"].to_dict()
+    ranked = sorted(shift.items(), key=lambda kv: kv[1])  # ascending: biggest decelerators first
+    losers = ranked[:n_pairs]
+    gainers = list(reversed(ranked[-n_pairs:]))  # biggest accelerator first
+
+    rows = []
+    for i in range(n_pairs):
+        from_sector, from_shift = losers[i]
+        to_sector, to_shift = gainers[i]
+        rows.append(
+            {
+                "Rank": i + 1,
+                "From Sector": from_sector,
+                "From Ticker": broker_ticker(sector_to_ticker[from_sector]),
+                "From 1M-3M Shift %": round(from_shift, 2),
+                "To Sector": to_sector,
+                "To Ticker": broker_ticker(sector_to_ticker[to_sector]),
+                "To 1M-3M Shift %": round(to_shift, 2),
+            }
+        )
+
+    st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
+
+
 # --- Taxonomy chart (Asset Class -> Category -> Sector/Theme) ---
 
 
@@ -110,18 +156,23 @@ def load_taxonomy(path: Path) -> list[dict]:
         return yaml.safe_load(f)
 
 
-def sector_1y_returns(df: pd.DataFrame) -> dict[str, float]:
-    """Average 1-year return per sector, across every tracked ETF in it
-    (unfiltered by the sector multiselect -- the sunburst always reflects
-    true current performance)."""
+def sector_momentum(df: pd.DataFrame, days: int) -> dict[str, float]:
+    """Average N-day return per sector, across every tracked ETF in it
+    (unfiltered by the sector multiselect)."""
     pivot = df.pivot_table(index="date", columns="name", values="close")
     name_to_sector = df.drop_duplicates("name").set_index("name")["sector"].to_dict()
     by_sector: dict[str, list[float]] = {}
     for name, series in pivot.items():
-        ret = period_return(series, 365)
+        ret = period_return(series, days)
         if ret is not None:
             by_sector.setdefault(name_to_sector[name], []).append(ret)
     return {sector: sum(vals) / len(vals) for sector, vals in by_sector.items()}
+
+
+def sector_1y_returns(df: pd.DataFrame) -> dict[str, float]:
+    """Average 1-year return per sector -- used by the taxonomy chart, which
+    always reflects true current performance regardless of the sector filter."""
+    return sector_momentum(df, 365)
 
 
 def build_taxonomy_sunburst(taxonomy: list[dict], sector_returns: dict[str, float]) -> go.Figure:

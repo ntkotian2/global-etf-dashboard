@@ -10,6 +10,7 @@ from common import (
     load_data,
     render_returns_comparison_table,
     render_sector_performance_chart,
+    render_sector_rotation_table,
     render_taxonomy_chart,
     render_trending_table,
 )
@@ -39,6 +40,7 @@ selected_sectors = st.multiselect("Sectors", sectors, default=sectors, key="sect
 
 render_sector_performance_chart(df, selected_sectors, period_key="period_canada")
 render_returns_comparison_table(df, selected_sectors)
+render_sector_rotation_table(df)
 render_trending_table(CONFIG_DIR / "social_trending_etfs_canada.yaml", df)
 
 st.caption(f"Data through {df['date'].max().date()}")
