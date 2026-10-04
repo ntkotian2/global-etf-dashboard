@@ -26,16 +26,31 @@ social-media-trending ETFs.
 pip install -r requirements.txt
 ```
 
-## Fetch data
+## Data pipeline ($0)
+
+Prices refresh once daily via the GitHub Actions workflow
+[.github/workflows/daily-fetch.yml](.github/workflows/daily-fetch.yml)
+(21:30 UTC -- after NSE and NYSE close; free, unlimited minutes on public
+repos). It runs [scripts/daily_refresh.py](scripts/daily_refresh.py), which
+incrementally extends `data/prices.csv` (`ticker,date,close`) from yfinance
+and commits it back to the repo. The Streamlit dashboard and the Render API
+both read that committed file -- **nothing fetches from Yahoo at request
+time** (Yahoo rate-limits datacenter IPs, which used to break page loads
+and return 500s on every API endpoint).
+
+To refresh manually: repo's Actions tab -> "Daily ETF price refresh" ->
+"Run workflow". Or locally:
 
 ```
-python src/fetch.py          # incremental update (only new dates since last fetch)
-python src/fetch.py --full   # re-download full history for every ETF
+python scripts/daily_refresh.py   # incremental, updates data/prices.csv
+python src/fetch.py               # legacy local flow: SQLite DB in data/etfs.db (gitignored)
+python src/fetch.py --full        # re-download full history for every ETF
 ```
 
-This populates `data/etfs.db` (SQLite) from every config file in
-`src/fetch.py`'s `CONFIG_FILES` map (India, USA, USA-AI, Canada). Re-run
-periodically (e.g. daily after market close) to keep the database current.
+`src/fetch.py` also exports `data/prices.csv` after every run, so the local
+dashboard (via the Windows auto-start script) stays on the same data
+contract. Ticker metadata (name, sector, market) is joined from
+`config/*.yaml` at read time (`src/db.py: read_prices_csv`).
 
 ## View the dashboard
 
@@ -144,15 +159,15 @@ Streamlit routes through to the app process — confirmed by testing that even
 Streamlit's *own* built-in static assets (`favicon.png`, `manifest.json`) get
 served the gateway's app shell instead of their real content on this
 platform. So the public API is instead [api-server/](api-server/), a small
-standalone FastAPI service with its own SQLite database (same self-refresh
-pattern as the dashboard, via yfinance).
+standalone FastAPI service that reads the daily-committed
+`data/prices.csv` snapshot (same as the dashboard -- no live fetching).
 
 ### Endpoints
 
 Live at https://global-etf-database-api.onrender.com (deployed on Render's
 free tier — the first request after a period of inactivity takes ~30-60s to
-wake the service and cold-fetch that market's price history; cached
-responses after that are near-instant):
+wake the service; data itself is the daily-committed snapshot, and responses
+are cached 1 hour per market):
 
 ```
 GET https://global-etf-database-api.onrender.com/            # discovery doc: schema + endpoint list

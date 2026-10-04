@@ -7,6 +7,11 @@ FastAPI service that computes the exact same payloads independently, using
 its own SQLite database (self-refreshing via yfinance, same pattern as the
 dashboard).
 
+Data comes from data/prices.csv, committed to the repo once daily by the
+GitHub Actions workflow (see README "Data pipeline"). Nothing fetches from
+Yahoo at request time: datacenter IPs get rate-limited, which used to
+return 500s on every endpoint.
+
 Run locally:
     uvicorn main:app --reload --port 8000
 """
@@ -22,8 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from api_data import build_market_api_payload, market_slug  # noqa: E402
-from db import get_connection  # noqa: E402
-from fetch import fetch_market  # noqa: E402
+from db import read_prices_csv  # noqa: E402
 
 CONFIG_DIR = REPO_ROOT / "config"
 
@@ -51,23 +55,8 @@ app.add_middleware(
 
 
 def _load_market_df(market: str):
-    import pandas as pd
-
-    fetch_market(market)
-    conn = get_connection()
-    df = pd.read_sql_query(
-        """
-        SELECT p.ticker, e.name, e.sector, p.date, p.close
-        FROM prices p JOIN etfs e ON e.ticker = p.ticker
-        WHERE e.market = ?
-        ORDER BY p.date
-        """,
-        conn,
-        params=(market,),
-        parse_dates=["date"],
-    )
-    conn.close()
-    return df
+    # $0 pipeline: read the daily-committed snapshot -- no yfinance here.
+    return read_prices_csv(market)
 
 
 def _get_market_payload(market: str) -> dict:
@@ -103,6 +92,7 @@ def index() -> dict:
             "Prices come from Yahoo Finance via yfinance -- free and unofficial, delayed, not for trading decisions.",
             "sector_rotation is a computed price-momentum proxy, not real fund-flow or social-media data.",
             "trending is a manually curated, periodically-refreshed list, not a live social-media feed.",
+            "Price history refreshes once daily via a GitHub Actions workflow (free tier).",
             "Snapshots are cached for up to 1 hour per market.",
         ],
     }

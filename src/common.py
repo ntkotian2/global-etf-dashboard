@@ -17,7 +17,7 @@ from api_data import (
     sector_1y_returns,
     sector_momentum,
 )
-from db import get_connection
+from db import read_prices_csv
 
 # Streamlit serves ./static/ (relative to the running app file, src/app.py)
 # at the public path /app/static/ -- see .streamlit/config.toml
@@ -54,34 +54,22 @@ TAXONOMY_RED_THRESHOLD = -10.0
 
 @st.cache_data(ttl=3600)
 def load_data(market: str, trending_config_path: Path | None = None) -> pd.DataFrame:
-    """Self-refreshing: fetches this market's latest prices before reading,
-    so the app stays current without an external scheduler (e.g. on
-    Streamlit Community Cloud, which has no cron/Task Scheduler). Cheap on a
-    warm database (incremental fetch), self-heals with a full history pull
-    if the database is empty (ephemeral cloud storage can reset between
-    container restarts) -- that first load can take up to a minute.
+    """Reads the price-history snapshot (data/prices.csv), refreshed once
+    daily by the GitHub Actions workflow -- see README "Data pipeline".
+    No live fetching here: Yahoo rate-limits datacenter IPs, which used to
+    break page loads on Streamlit Community Cloud and Render.
 
     Also re-exports this market's JSON API snapshot (see export_market_api)
     on the same cache cycle, so /app/static/api/ stays in sync with what the
     dashboard shows without a separate write path."""
-    from fetch import fetch_market
+    df = read_prices_csv(market)
 
-    with st.spinner(f"Fetching latest {market} prices…"):
-        fetch_market(market)
-
-    conn = get_connection()
-    df = pd.read_sql_query(
-        """
-        SELECT p.ticker, e.name, e.sector, p.date, p.close
-        FROM prices p JOIN etfs e ON e.ticker = p.ticker
-        WHERE e.market = ?
-        ORDER BY p.date
-        """,
-        conn,
-        params=(market,),
-        parse_dates=["date"],
-    )
-    conn.close()
+    if df.empty:
+        st.warning(
+            f"No price data for {market} yet -- the daily refresh workflow "
+            "hasn't produced data/prices.csv. Check the repo's Actions tab."
+        )
+        return df
 
     if trending_config_path is not None:
         export_market_api(market, df, trending_config_path)

@@ -95,6 +95,24 @@ def upsert_prices(conn, rows: "list[tuple]") -> None:
     conn.commit()
 
 
+def export_prices_csv(conn) -> Path:
+    """Write the committed price-history snapshot (data/prices.csv) that the
+    Streamlit dashboard and the Render API read. Ticker metadata (name,
+    sector, market) lives in config/*.yaml and is joined at read time (see
+    db.read_prices_csv), so the CSV carries only ticker,date,close."""
+    import pandas as pd
+
+    df = pd.read_sql_query(
+        "SELECT ticker, date, close FROM prices ORDER BY ticker, date", conn
+    )
+    out = Path(__file__).resolve().parent.parent / "data" / "prices.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out, index=False)
+    print(f"Exported {len(df)} rows to {out}")
+    return out
+
+
+
 def fetch_market(market: str, full: bool = False) -> None:
     """Incrementally fetch just one market's tickers. Called by the dashboard
     itself (common.py) on each cache miss, so data self-refreshes on
@@ -109,6 +127,7 @@ def fetch_market(market: str, full: bool = False) -> None:
         start = None if full else last_date_for(conn, ticker)
         rows = fetch_ticker(ticker, start)
         upsert_prices(conn, rows)
+    export_prices_csv(conn)
     conn.close()
 
 
@@ -130,6 +149,7 @@ def main() -> None:
         upsert_prices(conn, rows)
         print(f"{ticker}: {len(rows)} rows fetched (start={start or 'max history'})")
 
+    export_prices_csv(conn)
     conn.close()
 
 
